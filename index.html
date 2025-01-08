@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Untitled</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Intro Estilo Discord</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      background: linear-gradient(135deg, #2c2f33, #23272a);
+      font-family: Arial, sans-serif;
+      color: #fff;
+    }
+
+    .intro {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      overflow: hidden;
+      background: linear-gradient(135deg, #2c2f33, #23272a);
+    }
+
+    .animation-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .firework, .snowflake {
+      position: absolute;
+      background-color: #7289da;
+      border-radius: 50%;
+      animation: fadeOut 1.5s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes fadeOut {
+      0% {
+        transform: scale(0);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(20);
+        opacity: 0;
+      }
+    }
+
+    .snowflake {
+      background-color: #99aab5;
+      animation: fall 3s linear infinite;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-100px);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh);
+        opacity: 0.5;
+      }
+    }
+
+    .wk {
+      font-size: 10rem;
+      font-weight: bold;
+      text-align: center;
+      background: linear-gradient(45deg, #7289da, #99aab5, #7289da);
+      color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+      animation: fadeIn 2s ease-in-out forwards, fadeOut 1s 4s forwards;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+    }
+
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+      }
+      50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="intro">
+    <div class="animation-container"></div>
+    <div class="wk">WK</div>
+  </div>
+
+  <script>
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    const animationContainer = document.querySelector('.animation-container');
+
+    function createFirework() {
+      const firework = document.createElement('div');
+      firework.classList.add('firework');
+      const size = Math.random() * 50 + 20;
+      firework.style.width = `${size}px`;
+      firework.style.height = `${size}px`;
+      firework.style.left = `${Math.random() * window.innerWidth}px`;
+      firework.style.top = `${Math.random() * window.innerHeight}px`;
+      animationContainer.appendChild(firework);
+      setTimeout(() => firework.remove(), 1500);
+    }
+
+    function createSnowflake() {
+      const snowflake = document.createElement('div');
+      snowflake.classList.add('snowflake');
+      const size = Math.random() * 10 + 5;
+      snowflake.style.width = `${size}px`;
+      snowflake.style.height = `${size}px`;
+      snowflake.style.left = `${Math.random() * window.innerWidth}px`;
+      snowflake.style.animationDuration = `${Math.random() * 3 + 2}s`;
+      animationContainer.appendChild(snowflake);
+      setTimeout(() => snowflake.remove(), 3000);
+    }
+
+    if (isIOS) {
+      setInterval(createFirework, 300);
+    } else if (isAndroid) {
+      setInterval(createSnowflake, 200);
+    }
+
+    setTimeout(() => {
+      document.querySelector('.intro').style.display = 'none';
+    }, 5000);
+  </script>
+
+</body>
+</html>
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nieve Estilo Año Nuevo</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #000;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Contenedor para la nieve */
+    .snowfall {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+      will-change: transform;
+    }
+
+    /* Cada copo de nieve */
+    .snowflake {
+      position: absolute;
+      top: -10px;
+      width: 10px;
+      height: 10px;
+      background: radial-gradient(circle, white, transparent);
+      border-radius: 50%;
+      animation: fall linear infinite, flicker ease-in-out infinite;
+    }
+
+    /* Animación de los copos */
+    @keyframes fall {
+      0% {
+        transform: translateY(0) translateX(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) translateX(calc(-50px + 100px * var(--direction)));
+        opacity: 0;
+      }
+    }
+
+    /* Efecto parpadeo para colores */
+    @keyframes flicker {
+      0%, 100% {
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px var(--color);
+      }
+      50% {
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.4), 0 0 30px var(--color);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Contenedor de la nieve -->
+  <div class="snowfall"></div>
+
+  <script>
+    const snowfall = document.querySelector('.snowfall');
+    const snowflakeCount = 30; // Reducido a 30 copos
+
+    // Lista de colores para el efecto Año Nuevo
+    const colors = ['#FF5733', '#FFC300', '#DAF7A6', '#33FF57', '#33C3FF', '#FF33F0', '#FF3333'];
+
+    // Función para generar un copo de nieve
+    function createSnowflake() {
+      const snowflake = document.createElement('div');
+      snowflake.classList.add('snowflake');
+
+      // Estilo aleatorio para cada copo
+      snowflake.style.left = Math.random() * 100 + 'vw'; // Posición horizontal
+      snowflake.style.animationDuration = Math.random() * 5 + 3 + 's'; // Duración aleatoria
+      snowflake.style.animationDelay = Math.random() * 3 + 's'; // Retardo aleatorio
+      snowflake.style.setProperty('--direction', Math.random()); // Variación de movimiento horizontal
+      snowflake.style.setProperty('--color', colors[Math.floor(Math.random() * colors.length)]); // Color aleatorio
+
+      snowfall.appendChild(snowflake);
+
+      // Eliminar el copo de nieve después de que termine su animación
+      snowflake.addEventListener('animationend', () => {
+        snowflake.remove();
+      });
+    }
+
+    // Crear copos iniciales
+    for (let i = 0; i < snowflakeCount; i++) {
+      createSnowflake();
+    }
+
+    // Animar continuamente
+    setInterval(createSnowflake, 500); // Crear un copo nuevo cada 500ms
+  </script>
+</body>
+</html>
+
+  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Intro Animada</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #36393f;
+      color: #ffffff;
+      overflow: hidden;
+    }
+
+    .intro-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #2f3136;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .intro-content {
+      width: 100%;
+      max-width: 600px;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .intro-slide {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+      padding: 20px;
+    }
+
+    .intro-slide.active {
+      display: block;
+      opacity: 1;
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 0.5em;
+    }
+
+    .icon {
+      font-size: 6em;
+      margin-bottom: 1em;
+      color: #7289da;
+      transition: transform 0.5s ease;
+    }
+
+    p {
+      font-size: 1.1em;
+      margin-bottom: 1.5em;
+    }
+
+    button {
+      padding: 12px 24px;
+      margin: 8px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.3s ease;
+    }
+
+    .next-button {
+      background-color: #5865f2;
+      color: #ffffff;
+    }
+
+    .next-button:hover {
+      background-color: #4752c4;
+      transform: scale(1.05);
+    }
+
+    .skip-button {
+      background-color: #99aab5;
+      color: #ffffff;
+    }
+
+    .skip-button:hover {
+      background-color: #7289da;
+      transform: scale(1.05);
+    }
+
+    /* Nueva animación de comprimir */
+    @keyframes compress {
+      from {
+        transform: scale(1);
+        opacity: 1;
+      }
+      to {
+        transform: scale(0);
+        opacity: 0;
+      }
+    }
+
+    /* Estilo de la privacidad */
+    .privacy-block {
+      padding: 20px;
+      background-color: #43474d;
+      border-radius: 10px;
+      margin: 20px auto;
+      max-width: 500px;
+      text-align: left;
+    }
+
+    .privacy-option {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .privacy-option:hover {
+      background-color: #5865f2;
+    }
+
+    .privacy-option i {
+      margin-right: 10px;
+      font-size: 1.5em;
+    }
+
+    .privacy-option span {
+      font-size: 1.1em;
+      color: #b9bbbe;
+    }
+
+    /* Estilo para verificar VPN */
+    .vpn-check {
+      display: none;
+      margin-top: 20px;
+      animation: fadeIn 1s ease;
+    }
+
+    .vpn-check.active {
+      display: block;
+    }
+
+    /* Animación fade-in */
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    /* Estilo del modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+    }
+
+    .modal-content {
+      background-color: #2f3136;
+      color: white;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      max-width: 500px;
+      width: 80%;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal button {
+      background-color: #5865f2;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    .modal button:hover {
+      background-color: #4752c4;
+    }
+  </style>
+</head>
+<body>
+
+<div id="intro-overlay" class="intro-overlay">
+  <div class="intro-content">
+    <!-- Slide 1 -->
+    <div class="intro-slide active">
+      <i class="fas fa-heart icon"></i>
+      <h1>Interactúa con artículos</h1>
+      <p>Da "Me gusta" y sigue tus artículos favoritos.</p>
+      <button class="next-button">Siguiente</button>
+      <button class="skip-button">Omitir</button>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="intro-slide">
+      <i class="fas fa-star icon"></i>
+      <h1>Recomendaciones diarias</h1>
+      <p>Descubre artículos seleccionados especialmente para ti cada día.</p>
+      <button class="next-button">Siguiente</button>
+      <button class="skip-button">Omitir</button>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="intro-slide">
+      <i class="fas fa-calendar-alt icon"></i>
+      <h1>Un día como hoy</h1>
+      <p>Descubre qué sucedió en la historia un día como hoy.</p>
+      <button class="next-button">Siguiente</button>
+      <button class="skip-button">Omitir</button>
+    </div>
+
+
+    <!-- Slide 4: Privacidad -->
+    <div class="intro-slide">
+      <i class="fas fa-shield-alt icon"></i>
+      <h1>Privacidad</h1>
+      <p>Nos comprometemos a proteger tu privacidad. Puedes activar o desactivar el rastreo de IP y más.</p>
+      
+      <!-- Bloque de opciones de privacidad con iconos interactivos -->
+      <div class="privacy-block">
+        <div class="privacy-option" id="ip-toggle" onclick="toggleIPTracking()">
+          <i class="fas fa-toggle-off" id="ip-icon"></i>
+          <span>Rastreo de IP</span>
+        </div>
+        <div class="privacy-option" id="vpn-toggle" onclick="toggleVPN()">
+          <i class="fas fa-toggle-off" id="vpn-icon"></i>
+          <span>Verificar VPN</span>
+        </div>
+      </div>
+      
+      <button class="next-button">Siguiente</button>
+      <button class="skip-button">Omitir</button>
+    </div>
+
+    <!-- Último Slide: "Empezar" -->
+    <div class="intro-slide">
+      <i class="fas fa-check-circle icon"></i>
+      <h1>Todo listo</h1>
+      <p>¡Ya puedes comenzar a disfrutar de la aplicación!</p>
+      <button class="skip-button">Empezar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para VPN -->
+<div id="vpn-modal" class="modal">
+  <div class="modal-content">
+    <h2>Verificación de VPN</h2>
+    <p>No se detectó VPN en tu conexión.</p>
+    <button onclick="closeModal('vpn-modal')">Cerrar</button>
+  </div>
+</div>
+
+<!-- Modal para Rastreo de IP -->
+<div id="ip-modal" class="modal">
+  <div class="modal-content">
+    <h2>Rastreo de IP</h2>
+    <p>El rastreo de IP está desactivado.</p>
+    <button onclick="closeModal('ip-modal')">Cerrar</button>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const slides = document.querySelectorAll('.intro-slide');
+    const nextButtons = document.querySelectorAll('.next-button');
+    const skipButtons = document.querySelectorAll('.skip-button');
+    const introOverlay = document.getElementById('intro-overlay');
+    let currentSlide = 0;
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.remove('active');
+        slide.style.opacity = 0;
+      });
+
+      const activeSlide = slides[index];
+      activeSlide.classList.add('active');
+      setTimeout(() => {
+        activeSlide.style.opacity = 1;
+      }, 10);
+    }
+
+    nextButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        if (currentSlide < slides.length - 1) {
+          currentSlide++;
+          showSlide(currentSlide);
+        }
+      });
+    });
+
+    skipButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        introOverlay.style.animation = 'compress 0.8s ease-in-out forwards';
+        setTimeout(() => {
+          introOverlay.style.display = 'none';
+          document.body.style.overflow = 'auto';
+        }, 800);
+      });
+    });
+
+  });
+
+  // Función de toggle para rastreo de IP
+  function toggleIPTracking() {
+    const ipIcon = document.getElementById('ip-icon');
+    const ipModal = document.getElementById('ip-modal');
+    if (ipIcon.classList.contains('fa-toggle-off')) {
+      ipIcon.classList.remove('fa-toggle-off');
+      ipIcon.classList.add('fa-toggle-on');
+      ipModal.classList.add('active');
+    } else {
+      ipIcon.classList.remove('fa-toggle-on');
+      ipIcon.classList.add('fa-toggle-off');
+      ipModal.classList.remove('active');
+    }
+  }
+
+  // Función de toggle para VPN
+  function toggleVPN() {
+    const vpnIcon = document.getElementById('vpn-icon');
+    const vpnModal = document.getElementById('vpn-modal');
+    if (vpnIcon.classList.contains('fa-toggle-off')) {
+      vpnIcon.classList.remove('fa-toggle-off');
+      vpnIcon.classList.add('fa-toggle-on');
+      vpnModal.classList.add('active');
+    } else {
+      vpnIcon.classList.remove('fa-toggle-on');
+      vpnIcon.classList.add('fa-toggle-off');
+      vpnModal.classList.remove('active');
+    }
+  }
+
+  function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.classList.remove('active');
+  }
+</script>
+
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glam 2.5</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #2f3136;
+      color: #dcddde;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #202225;
+      color: #fff;
+      padding: 10px;
+      border-bottom: 1px solid #40444b;
+    }
+    .header input {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      margin-right: 10px;
+      background-color: #40444b;
+      color: #fff;
+    }
+    .header select {
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      background-color: #40444b;
+      color: #fff;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+    .header button {
+      background-color: transparent;
+      color: #fff;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .header button:hover {
+      color: #7289da;
+    }
+    .grid-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+    .grid-item {
+      background-color: #3e4147;
+      padding: 20px;
+      width: 300px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      text-align: center;
+      position: relative;
+      transition: transform 0.3s ease;
+    }
+    .grid-item img {
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+    }
+    .grid-item a {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 10px 15px;
+      background-color: #7289da;
+      color: #fff;
+      border-radius: 5px;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+    .grid-item a:hover {
+      background-color: #5b6eae;
+    }
+    .spinner {
+      display: none;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #7289da;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 2s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .follow-btn, .like-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background-color: #7289da;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 15px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background-color 0.3s ease;
+    }
+    .follow-btn:hover, .like-btn:hover {
+      background-color: #5b6eae;
+    }
+    .like-btn.liked {
+      background-color: #e74c3c;
+      color: #fff;
+    }
+    .footer {
+      text-align: center;
+      padding: 20px;
+      background-color: #202225;
+      color: #fff;
+      border-top: 1px solid #40444b;
+    }
+    .report-btn {
+      background-color: #f39c12;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 15px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .report-btn:hover {
+      background-color: #e67e22;
+    }
+    .reported {
+      animation: reportAnimation 2s ease-in-out forwards;
+      color: red;
+      font-weight: bold;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    @keyframes reportAnimation {
+      0% { opacity: 0; transform: scale(0.5); }
+      50% { opacity: 1; transform: scale(1.2); }
+      100% { opacity: 0; transform: scale(0.5); }
+    }
+    .favorite-btn {
+  padding: 10px 20px;
+  font-size: 1rem;
+  color: white;
+  background: #007bff;
+  border: none;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.favorite-btn:hover {
+  background: #0056b3;
+}
+
+.favorite-btn:active {
+  transform: scale(0.95);
+}
+
+.favorite-btn i {
+  font-size: 1.2rem;
+}
+
+.favorite-btn i.favorited {
+  color: #ffc107; /* Gold color for favorited */
+  animation: awesome 0.5s ease-out forwards;
+}
+
+/* Animación Awesome */
+@keyframes awesome {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+  </style>
+</head>
+<body>
+  <div class="header">
+    <input type="text" id="searchInput" placeholder="write something...">
+    <select id="languageSelect" onchange="updateLanguage()">
+      <option value="es">Español</option>
+      <option value="en">Inglés</option>
+      <option value="fr">Francés</option>
+      <option value="de">Alemán</option>
+      <option value="pt">Portugués</option>
+      <option value="it">Italiano</option>
+      <option value="ru" >Ruso</option>
+      <option value="ja">Japonés</option>
+      <option value="zh">Chino</option>
+      <option value="ar">Árabe</option>
+      <option value="ko">Coreano</option>
+      <option value="ca">Catalán</option>
+      <option value="tr">Turco</option>
+      <option value="vi" >Vietnamita</option>
+      <option value="th" >Tailandés</option>
+      <option value="hi" >Hindi</option>
+    </select>
+    <button onclick="searchWikipedia()">
+      <i class="fas fa-search"></i>
+    </button>
+  </div>
+
+  <div id="gridContainer" class="grid-container"></div>
+  <div class="spinner" id="spinner"></div>
+
+  <div class="footer">
+    <p>Powered by Wikipedia</p>
+  </div>
+
+  <script>
+    let language = 'es'; // Idioma predeterminado
+    const translations = {
+      follow: {
+        es: 'Seguir',
+        en: 'Follow',
+        fr: 'Suivre',
+        de: 'Folgen',
+        pt: 'Seguir',
+        it: 'Segui',
+        ru: 'Следить',
+        ja: 'フォロー',
+        zh: '关注',
+        ar: 'متابعة',
+        ko: '팔로우',
+        ca: 'Seguir',
+        tr: 'Takip Et'
+        
+        
+      },
+      following: {
+        es: 'Siguiendo',
+        en: 'Following',
+        fr: 'Suivant',
+        de: 'Folgend',
+        pt: 'Seguindo',
+        it: 'Seguendo',
+        ru: 'Подписано',
+        ja: 'フォロー中',
+        zh: '已关注',
+        ar: 'متابع',
+        ko: '팔로잉',
+        ca: 'Seguint',
+        tr: 'Takip Ediyor'
+
+      },
+      like: {
+        es: 'Me gusta',
+        en: 'Like',
+        fr: 'J\'aime',
+        de: 'Gefällt mir',
+        pt: 'Curtir',
+        it: 'Mi piace',
+        ru: 'Нравится',
+        ja: 'いいね',
+        zh: '点赞',
+        ar: 'أعجبني',
+        ko: '좋아요',
+        ca: 'M agrada',
+        tr: 'Beğendim'
+
+      },
+      more: {
+        es: 'Ver más',
+        en: 'View more',
+        fr: 'Voir plus',
+        de: 'Mehr sehen',
+        pt: 'Ver mais',
+        it: 'Vedi di più',
+        ru: 'Посмотреть больше',
+        ja: 'もっと見る',
+        zh: '查看更多',
+        ar: 'عرض المزيد',
+        ko: '더 보기',
+        ca: 'Més informació',
+        tr: 'Daha Fazla'
+
+      },
+      report: {
+        es: 'Reportar',
+        en: 'Report',
+        fr: 'Signaler',
+        de: 'Melden',
+        pt: 'Denunciar',
+        it: 'Segnala',
+        ru: 'Пожаловаться',
+        ja: '報告',
+        zh: '举报',
+        ar: 'الإبلاغ',
+        ko: '신고',
+        ca: 'Denunciar',
+        tr: 'Şikayet Et'
+
+      }
+    };
+
+    function updateLanguage() {
+      language = document.getElementById('languageSelect').value;
+    }
+
+    function searchWikipedia() {
+      const query = document.getElementById('searchInput').value;
+      const gridContainer = document.getElementById('gridContainer');
+      gridContainer.innerHTML = '';
+      showSpinner(true);
+
+      const url = `https://${language}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${query}&utf8=&format=json&origin=*`;
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          const results = data.query.search;
+          fetchImagesForResults(results); // Obtener imágenes
+        })
+        .catch(() => {
+          alert('Error al buscar en Wikipedia. Inténtalo nuevamente.');
+          showSpinner(false);
+        });
+    }
+
+    function fetchImagesForResults(results) {
+      const gridContainer = document.getElementById('gridContainer');
+      const imagePromises = results.map(result => {
+        const pageUrl = `https://${language}.wikipedia.org/?curid=${result.pageid}`;
+        return fetch(`https://${language}.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${result.title}&pithumbsize=500&format=json&origin=*`)
+          .then(response => response.json())
+          .then(data => {
+            const page = data.query.pages[Object.keys(data.query.pages)[0]];
+            const imageUrl = page.thumbnail ? page.thumbnail.source : 'https://via.placeholder.com/300';
+            return { title: result.title, snippet: result.snippet, imageUrl, pageUrl };
+          });
+      });
+
+      Promise.all(imagePromises).then(resultsWithImages => {
+        displayResults(resultsWithImages);
+        showSpinner(false);
+      });
+    }
+
+    function displayResults(results) {
+      const gridContainer = document.getElementById('gridContainer');
+      gridContainer.innerHTML = '';
+      results.forEach(result => {
+        const gridItem = document.createElement('div');
+        gridItem.classList.add('grid-item');
+        gridItem.innerHTML = `
+          <img src="${result.imageUrl}" alt="${result.title}">
+          <h4>${result.title}</h4>
+          <p>${result.snippet}...</p>
+          <a href="${result.pageUrl}" target="_blank">${translations.more[language]}</a>
+          <button class="follow-btn" onclick="toggleFollow(this)">
+            <i class="fas fa-plus-circle"></i> ${translations.follow[language]}
+          </button>
+          <button class="like-btn" onclick="toggleLike(this)">
+            <i class="fas fa-heart"></i> ${translations.like[language]}
+          </button>
+          <button class="report-btn" onclick="reportItem(this)">
+            <i class="fas fa-flag"></i> ${translations.report[language]}
+          </button>
+          <div class="report-message" style="display: none;"></div>
+          
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">
+  <i class="fas fa-star"></i> Añadir a Favoritos
+</button>   
+
+
+
+        `;
+        gridContainer.appendChild(gridItem);
+      });
+    }
+
+    function toggleFollow(button) {
+      const isFollowing = button.innerText.includes(translations.following[language]);
+      button.innerHTML = isFollowing
+        ? `<i class="fas fa-plus-circle"></i> ${translations.follow[language]}`
+        : `<i class="fas fa-check-circle"></i> ${translations.following[language]}`;
+    }
+
+    function toggleLike(button) {
+      button.classList.toggle('liked');
+    }
+
+    function reportItem(button) {
+      const reportMessage = button.nextElementSibling;
+      reportMessage.innerText = 'Item reported';
+      reportMessage.style.display = 'block';
+      setTimeout(() => reportMessage.style.display = 'none', 3000);
+    }
+ function toggleFavorite(button) {
+  const icon = button.querySelector('i');
+  const isFavorite = icon.classList.contains('favorited');
+
+  if (isFavorite) {
+    // Remueve el estado de favorito
+    icon.classList.remove('favorited', 'fas');
+    icon.classList.add('far'); // Cambio a estilo vacío
+    button.innerHTML = `<i class="far fa-star"></i> Añadir a Favoritos`;
+  } else {
+    // Agrega el estado de favorito con animación
+    icon.classList.remove('far');
+    icon.classList.add('favorited', 'fas'); // Cambio a estilo lleno
+    button.innerHTML = `<i class="fas fa-star favorited"></i> Favorito`;
+  }
+}
+
+
+    function showSpinner(show) {
+      const spinner = document.getElementById('spinner');
+      spinner.style.display = show ? 'block' : 'none';
+    }
+  </script>
+</body>
+</html>
+<!-- partial -->
+  
+</body>
+</html>
