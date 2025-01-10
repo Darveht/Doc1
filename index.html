@@ -829,46 +829,6 @@
     transform: scale(1);
   }
 }
-.comment-section {
-  margin: 20px 0;
-  padding: 10px;
-  border-top: 1px solid #ccc;
-}
-
-.comment-section h3 {
-  margin: 0 0 10px;
-}
-
-.comment-section form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.comment-section textarea {
-  padding: 10px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  resize: vertical;
-}
-
-.comment-section .favorite-btn {
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.comment-section .favorite-btn:hover {
-  background-color: #0056b3;
-}
-
-#commentsContainer {
-  margin-top: 20px;
-}
   </style>
 </head>
 <body>
@@ -1064,18 +1024,6 @@
           <button class="favorite-btn" onclick="toggleFavorite(this)">
   <i class="fas fa-star"></i> Añadir a Favoritos
 </button>   
-          
-          
-          <div class="comment-section">
-  <h3>Comentarios</h3>
-  <form id="commentForm">
-    <textarea id="commentText" placeholder="Escribe tu comentario aquí..." required></textarea>
-    <button class="favorite-btn" type="submit">
-      <i class="fas fa-star"></i> Enviar Comentario
-    </button>
-  </form>
-  <div id="commentsContainer"></div>
-</div>
 
 
 
@@ -1117,24 +1065,6 @@
     button.innerHTML = `<i class="fas fa-star favorited"></i> Favorito`;
   }
 }
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const commentForm = document.getElementById('commentForm');
-    const commentsContainer = document.getElementById('commentsContainer');
-
-    commentForm.addEventListener('submit', function (event) {
-      event.preventDefault();
-
-      const commentText = document.getElementById('commentText').value;
-      if (commentText.trim() !== '') {
-        const commentElement = document.createElement('p');
-        commentElement.textContent = commentText;
-        commentsContainer.appendChild(commentElement);
-        commentForm.reset();
-      }
-    });
-  });
-</script>
 
     function showSpinner(show) {
       const spinner = document.getElementById('spinner');
