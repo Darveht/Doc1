@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Intro Estilo Discord</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
   <style>
     body {
       margin: 0;
@@ -104,6 +105,45 @@
         transform: translate(-50%, -50%) scale(1);
       }
     }
+
+    .screen-block {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #7289da; /* Fondo morado sólido */
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .screen-block button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .screen-block ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .screen-block li {
+      margin: 10px 0;
+    }
+
+    .screen-block li i {
+      margin-right: 10px;
+    }
   </style>
 </head>
 <body>
@@ -151,12 +191,39 @@
 
     setTimeout(() => {
       document.querySelector('.intro').style.display = 'none';
+      showScreenBlock();
     }, 5000);
+
+    function showScreenBlock() {
+      const screenBlock = document.createElement('div');
+      screenBlock.classList.add('screen-block');
+      screenBlock.innerHTML = `
+        <div>
+          <h1>Actualización Wkype 2.4</h1>
+          <p>Se han realizado las siguientes mejoras:</p>
+          <ul>
+            <li><i class="fas fa-shield-alt"></i>Mejoras en la seguridad y privacidad.</li>
+            <li><i class="fas fa-bug"></i>Corrección de errores y mejoras en el rendimiento.</li>
+            <li><i class="fas fa-user-alt"></i>Interfaz de usuario mejorada.</li>
+            <li><i class="fas fa-language"></i>Idiomas disponibles: vietnamita, indonesio y hindi.</li>
+            <li><i class="fas fa-lock"></i>La privacidad de los usuarios es nuestra prioridad.</li>
+          </ul>
+          <button onclick="closeScreenBlock()">Cerrar</button>
+        </div>
+      `;
+      document.body.appendChild(screenBlock);
+    }
+
+    function closeScreenBlock() {
+      const screenBlock = document.querySelector('.screen-block');
+      if (screenBlock) {
+        screenBlock.remove();
+      }
+    }
   </script>
 
 </body>
 </html>
-
 
 
 <!DOCTYPE html>
