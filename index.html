@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -209,10 +209,16 @@
       setInterval(createSnowflake, 200);
     }
 
-    setTimeout(() => {
-      document.querySelector('.intro').style.display = 'none';
-      showScreenBlock();
-    }, 5000);
+    document.addEventListener('DOMContentLoaded', function () {
+      if (!localStorage.getItem('updateShown')) {
+        setTimeout(() => {
+          document.querySelector('.intro').style.display = 'none';
+          showScreenBlock();
+        }, 5000);
+      } else {
+        document.querySelector('.intro').style.display = 'none';
+      }
+    });
 
     function showScreenBlock() {
       const screenBlock = document.createElement('div');
@@ -228,10 +234,11 @@
             <li><i class="fas fa-language"></i>Idiomas disponibles: vietnamita, indonesio y hindi.</li>
             <li><i class="fas fa-lock"></i>La privacidad de los usuarios es nuestra prioridad.</li>
           </ul>
-          <button onclick="closeScreenBlock()">Cerrar</button>
+          <button onclick="closeScreenBlock()" id="close-button">Cerrar</button>
         </div>
       `;
       document.body.appendChild(screenBlock);
+      localStorage.setItem('updateShown', 'true');
     }
 
     function closeScreenBlock() {
