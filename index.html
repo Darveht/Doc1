@@ -211,7 +211,12 @@
 
     document.addEventListener('DOMContentLoaded', function () {
       if (!localStorage.getItem('updateShown')) {
-        showScreenBlock();
+        setTimeout(() => {
+          document.querySelector('.intro').style.display = 'none';
+          showScreenBlock();
+        }, 5000);
+      } else {
+        document.querySelector('.intro').style.display = 'none';
       }
     });
 
