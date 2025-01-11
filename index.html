@@ -280,13 +280,21 @@
       will-change: transform;
     }
 
-    /* Cada copo de nieve */
+    /* Cada copo de nieve y hoja */
     .snowflake, .leaf {
       position: absolute;
       top: -10px;
       font-size: 20px;
       color: white;
       animation: fall linear infinite, flicker ease-in-out infinite;
+    }
+
+    /* Hojas con imagen */
+    .leaf {
+      width: 30px;
+      height: 30px;
+      background-size: cover;
+      background-image: url('path/to/your/image.jpg'); /* Replace with the URL to your image */
     }
 
     /* Animación de los copos y hojas */
@@ -346,15 +354,14 @@
 
     // Función para generar una hoja con nieve
     function createLeaf() {
-      const leaf = document.createElement('i');
-      leaf.classList.add('fas', 'fa-leaf', 'leaf');
+      const leaf = document.createElement('div');
+      leaf.classList.add('leaf');
 
       // Estilo aleatorio para cada hoja
       leaf.style.left = Math.random() * 100 + 'vw';
       leaf.style.animationDuration = Math.random() * 5 + 3 + 's';
       leaf.style.animationDelay = Math.random() * 3 + 's';
       leaf.style.setProperty('--direction', Math.random());
-      leaf.style.setProperty('--color', colors[Math.floor(Math.random() * colors.length)]);
 
       snowfall.appendChild(leaf);
 
