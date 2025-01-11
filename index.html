@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -211,12 +211,7 @@
 
     document.addEventListener('DOMContentLoaded', function () {
       if (!localStorage.getItem('updateShown')) {
-        setTimeout(() => {
-          document.querySelector('.intro').style.display = 'none';
-          showScreenBlock();
-        }, 5000);
-      } else {
-        document.querySelector('.intro').style.display = 'none';
+        showScreenBlock();
       }
     });
 
