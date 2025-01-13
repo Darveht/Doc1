@@ -755,6 +755,8 @@
 </body>
 </html>
 
+
+</html>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -954,6 +956,7 @@
     transform: scale(1);
   }
 }
+
   </style>
 </head>
 <body>
@@ -976,38 +979,6 @@
       <option value="vi" >Vietnamita</option>
       <option value="th" >Tailandés</option>
       <option value="hi" >Hindi</option>
-      <option value="pl">Polaco</option> 
-      <option value="nl">Neerlandés</option>
-      <option value="sv">Sueco</option> 
-      <option value="fi">Finlandés</option>
-      <option value="no">Noruego</option> 
-      <option value="da">Danés</option> 
-      <option value="el">Griego</option> 
-      <option value="he">Hebreo</option>
-      <option value="ro">Rumano</option> 
-      <option value="hu">Húngaro</option> 
-      <option value="cs">Checo</option> 
-      <option value="sk">Eslovaco</option>
-      <option value="bg">Búlgaro</option>
-      <option value="hr">Croata</option>
-      <option value="et">Estonio</option>
-      <option value="lv">Letón</option>
-      <option value="lt">Lituano</option>
-      <option value="mt">Maltés</option>
-      <option value="sr">Serbio</option>
-      <option value="sl">Esloveno</option>
-      <option value="uk">Ucraniano</option>
-      <option value="bn">Bengalí</option>
-      <option value="ta">Tamil</option>
-      <option value="te">Telugu</option>
-      <option value="kn">Canarés</option>
-      <option value="ml">Malayalam</option>
-      <option value="mr">Maratí</option>
-      <option value="ur">Urdu</option>
-      <option value="gu">Gujarati</option>
-      <option value="pa">Panyabí</option>
-      <option value="si">Cingalés</option>
-
     </select>
     <button onclick="searchWikipedia()">
       <i class="fas fa-search"></i>
@@ -1017,9 +988,6 @@
   <div id="gridContainer" class="grid-container"></div>
   <div class="spinner" id="spinner"></div>
 
-  <div class="footer">
-    <p>Powered by Wikipedia</p>
-  </div>
 
   <script>
     let language = 'es'; // Idioma predeterminado
@@ -1037,42 +1005,7 @@
         ar: 'متابعة',
         ko: '팔로우',
         ca: 'Seguir',
-        vi: 'Theo dõi',
-        th: 'Theo dõi',
-        th: 'ติดตาม',
-        hi: 'अनुसरण करें',
-        pl: 'Obserwuj',
-        nl: 'Volgen',
-        sv: 'Följ', 
-        fi: 'Seuraa',
-        no: 'Følg',
-        da: 'Følg',
-        el: 'Ακολουθήστε',
-        he: 'עקוב',
-        ro: 'Urmărește',
-        hu: 'Kövesse',
-        cs: 'Sleduj',
-        sk: 'Sledujte',
-        bg: 'Следвайте',
-        hr: 'Slijedite',
-        et: 'Jälgi',
-        lv: 'Sekot',
-        lt: 'Sekti',
-        mt: 'Segwi',
-        sr: 'Пратите',
-        sl: 'Sledi',
-        uk: 'Слідуйте',
-        bn: 'অনুসরণ করুন',
-        ta: 'பின்பற்றவும்',
-        te: 'అనుసరించండి',
-        kn: 'ಹಿಂಬಾಲಿಸು',
-        ml: 'അനുസരിക്കുക',
-        mr: 'अनुसरण करा',
-        ur: 'پیروی کریں',
-        gu: 'અનુસરો',
-        pa: 'ਪਾਲਣਾ ਕਰੋ',
-        si: 'අනුගමනය කරන්න'
- 
+        tr: 'Takip Et'
         
         
       },
@@ -1089,42 +1022,7 @@
         ar: 'متابع',
         ko: '팔로잉',
         ca: 'Seguint',
-        tr: 'Takip Ediyor',
-        vi: 'Đang theo dõi',
-        th: 'ติดตาม',
-        hi: 'अनुसरण करें',
-        pl: 'Obserwuj', 
-        nl: 'Volgen', 
-        sv: 'Följ',
-        fi: 'Seuraa', 
-        no: 'Følg', 
-        da: 'Følg',
-        el: 'Ακολουθήστε', 
-        he: 'עקוב',
-        ro: 'Urmărește', 
-        hu: 'Kövesse', 
-        cs: 'Sleduj', 
-        sk: 'Sledujte',
-        bg: 'Следвайки',
-        hr: 'Slijedeći',
-        et: 'Jälgides',
-        lv: 'Sekojot',
-        lt: 'Sekant',
-        mt: 'Issegwi',
-        sr: 'Пратећи',
-        sl: 'Sledi',
-        uk: 'Слідуючи',
-        bn: 'অনুসরণ করা',
-        ta: 'பின்தொடர்ந்து',
-        te: 'అనుసరించడం',
-        kn: 'ಹಿಂಬಾಲಿಸುತ್ತಿರುವ',
-        ml: 'അനുസരിച്ച്',
-        mr: 'अनुसरण करत आहे',
-        ur: 'پیروی کر رہا ہے',
-        gu: 'અનુસરીને',
-        pa: 'ਪਾਲਣਾ ਕਰਦੇ ਹੋਏ',
-        si: 'අනුගමනය කරන',
-       
+        tr: 'Takip Ediyor'
 
       },
       like: {
@@ -1140,43 +1038,7 @@
         ar: 'أعجبني',
         ko: '좋아요',
         ca: 'M agrada',
-        tr: 'Beğendim',
-        vi: 'Tôi thích',
-        th: 'ติดตาม', 
-        hi: 'अनुसरण करें',
-        pl: 'Obserwuj', 
-        nl: 'Volgen', 
-        sv: 'Följ',
-        fi: 'Seuraa', 
-        no: 'Følg',
-        da: 'Følg',
-        el: 'Ακολουθήστε', 
-        he: 'עקוב', 
-        ro: 'Urmărește', 
-        hu: 'Kövesse', 
-        cs: 'Sleduj', 
-        sk: 'Sledujte',
-        bg: 'Харесва ми',
-        hr: 'Sviđa mi se',
-        et: 'Mulle meeldib',
-        lv: 'Man patīk',
-        lt: 'Man patinka',
-        mt: 'Jogħġobni',
-        sr: 'Свиђа ми се',
-        sl: 'Všeč mi je',
-        uk: 'Мені подобається',
-        bn: 'আমার পছন্দ',
-        ta: 'எனக்கு பிடிக்கும்',
-        te: 'నాకు నచ్చింది',
-        kn: 'ನನಗೆ ಇഷ്ടವಾಯಿತು',
-        ml: 'എനിക്ക് ഇഷ്ടമാണ്',
-        mr: 'मला आवडते',
-        ur: 'مجھے پسند ہے',
-        gu: 'મને ગમે છે',
-        pa: 'ਮੈਨੂੰ ਪਸੰਦ ਹੈ',
-        si: 'මට කැමතියි',
-
-
+        tr: 'Beğendim'
 
       },
       more: {
@@ -1192,41 +1054,7 @@
         ar: 'عرض المزيد',
         ko: '더 보기',
         ca: 'Més informació',
-        tr: 'Daha Fazla',
-        vi: 'Thêm nữa',
-        th: 'ติดตาม',
-        hi: 'अनुसरण करें',
-        pl: 'Obserwuj', 
-        nl: 'Volgen', 
-        sv: 'Följ', 
-        fi: 'Seuraa',
-        no: 'Følg', 
-        da: 'Følg',
-        el: 'Ακολουθήστε',
-        he: 'עקוב', 
-        ro: 'Urmărește',
-        hu: 'Kövesse', 
-        cs: 'Sleduj',
-        sk: 'Sledujte',
-        bg: 'Виж повече',
-        hr: 'Vidi više',
-        et: 'Vaata rohkem',
-        lv: 'Skatīt vairāk',
-        lt: 'Žiūrėti daugiau',
-        mt: 'Ara iktar',
-        sr: 'Погледај више',
-        sl: 'Poglej več',
-        uk: 'Дивитися більше',
-        bn: 'আরও দেখুন',
-        ta: 'மேலும் பார்க்க',
-        te: 'మరిన్ని చూడండి',
-        kn: 'ಇನ್ನಷ್ಟು ನೋಡಿ',
-        ml: 'കൂടുതൽ കാണുക',
-        mr: 'अधिक पहा',
-        ur: 'مزید دیکھیں',
-        gu: 'વધુ જુઓ',
-        pa: 'ਹੋਰ ਵੇਖੋ',
-        si: 'තවත් බලන්න'
+        tr: 'Daha Fazla'
 
       },
       report: {
@@ -1242,43 +1070,8 @@
         ar: 'الإبلاغ',
         ko: '신고',
         ca: 'Denunciar',
-        tr: 'Şikayet Et',
-        vi: 'Báo cáo',
-        th: 'ติดตาม',
-        hi: 'अनुसरण करें',
-        pl: 'Obserwuj',
-        nl: 'Volgen',
-        sv: 'Följ', 
-        fi: 'Seuraa',
-        no: 'Følg', 
-        da: 'Følg', 
-        el: 'Ακολουθήστε', 
-        he: 'עקוב',
-        ro: 'Urmărește',
-        hu: 'Kövesse',
-        cs: 'Sleduj',
-        sk: 'Sledujte',
-        bg: 'Докладвай',
-        hr: 'Prijavi',
-        et: 'Teata',
-        lv: 'Ziņot',
-        lt: 'Pranešti',
-        mt: 'Rappurtar',
-        sr: 'Пријави',
-        sl: 'Poročaj',
-        uk: 'Доповісти',
-        bn: 'রিপোর্ট করুন',
-        ta: 'அறிக்கை',
-        te: 'నివేదించు',
-        kn: 'ವರದಿ',
-        ml: 'റിപ്പോർട്ട് ചെയ്യുക',
-        mr: 'अहवाल द्या',
-        ur: 'رپورٹ کریں',
-        gu: 'અહેવાલ આપો',
-        pa: 'ਰਿਪੋਰਟ ਕਰੋ',
-        si: 'වාර්තා කරන්න'
-          
-        },
+        tr: 'Şikayet Et'
+
       }
     };
 
@@ -1345,9 +1138,9 @@
             <i class="fas fa-flag"></i> ${translations.report[language]}
           </button>
           <div class="report-message" style="display: none;"></div>
-          <button class="favorite-btn" onclick="toggleFavorite(this)">
-  <i class="fas fa-star"></i> Añadir a Favoritos 
-           
+          
+                    <button class="favorite-btn" onclick="toggleFavorite(this)">
+  <i class="fas fa-star"></i> Añadir a Favoritos
 </button>   
 
 
@@ -1391,14 +1184,18 @@
   }
 }
 
-    function showSpinner(show) {
+
+    function 
+    
+    
+    showSpinner(show) {
       const spinner = document.getElementById('spinner');
       spinner.style.display = show ? 'block' : 'none';
     }
   </script>
 </body>
-</html>
-<!-- partial -->
+<html>
+      
   
-</body>
-</html>
+  
+  
