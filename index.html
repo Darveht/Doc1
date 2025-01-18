@@ -861,33 +861,41 @@
       100% { transform: rotate(360deg); }
     }
     .follow-btn, .like-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background-color: #7289da;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      padding: 10px 15px;
-      font-size: 14px;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: background-color 0.3s ease;
-    }
-    .follow-btn:hover, .like-btn:hover {
-      background-color: #5b6eae;
-    }
-    .like-btn.liked {
-      background-color: #e74c3c;
-      color: #fff;
-    }
-    .footer {
-      text-align: center;
-      padding: 20px;
-      background-color: #202225;
-      color: #fff;
-      border-top: 1px solid #40444b;
-    }
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background-color: #7289da;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+
+  .follow-btn:hover, .like-btn:hover {
+    background-color: #5b6eae;
+    transform: scale(1.05);
+  }
+
+  .like-btn.liked {
+    background-color: #e74c3c;
+    color: #fff;
+  }
+
+  .follow-btn:active, .like-btn:active {
+    transform: scale(0.95);
+  }
+
+  .footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #202225;
+    color: #fff;
+    border-top: 1px solid #40444b;
+  }
     .report-btn {
       background-color: #f39c12;
       color: #fff;
