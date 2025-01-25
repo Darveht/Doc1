@@ -254,12 +254,13 @@
 </html>
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nieve Estilo Año Nuevo</title>
+  <title>Fuego Estilo Realista</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
   <style>
     body {
@@ -270,8 +271,8 @@
       font-family: Arial, sans-serif;
     }
 
-    /* Contenedor para la nieve y hojas */
-    .snowfall {
+    /* Contenedor para el fuego */
+    .firefall {
       position: fixed;
       top: 0;
       left: 0;
@@ -282,25 +283,17 @@
       will-change: transform;
     }
 
-    /* Cada copo de nieve y hoja */
-    .snowflake, .leaf {
+    /* Cada llama */
+    .flame {
       position: absolute;
       top: -10px;
-      font-size: 20px;
-      color: white;
-      animation: fall linear infinite, flicker ease-in-out infinite;
+      font-size: 30px;
+      color: orange;
+      animation: move linear infinite, flicker ease-in-out infinite;
     }
 
-    /* Hojas con imagen */
-    .leaf {
-      width: 30px;
-      height: 30px;
-      background-size: cover;
-      background-image: url('path/to/your/image.jpg'); /* Replace with the URL to your image */
-    }
-
-    /* Animación de los copos y hojas */
-    @keyframes fall {
+    /* Animación de fuego */
+    @keyframes move {
       0% {
         transform: translateY(0) translateX(0);
         opacity: 1;
@@ -311,83 +304,58 @@
       }
     }
 
-    /* Efecto parpadeo para colores */
+    /* Efecto parpadeo del fuego */
     @keyframes flicker {
       0%, 100% {
-        box-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px var(--color);
+        box-shadow: 0 0 10px rgba(255, 69, 0, 0.8), 0 0 20px var(--color);
       }
       50% {
-        box-shadow: 0 0 20px rgba(255, 255, 255, 0.4), 0 0 30px var(--color);
+        box-shadow: 0 0 20px rgba(255, 69, 0, 0.4), 0 0 30px var(--color);
       }
     }
   </style>
 </head>
 <body>
-  <!-- Contenedor de la nieve y hojas -->
-  <div class="snowfall"></div>
+  <!-- Contenedor del fuego -->
+  <div class="firefall"></div>
 
   <script>
-    const snowfall = document.querySelector('.snowfall');
-    const snowflakeCount = 30;
-    const leafCount = 15;
+    const firefall = document.querySelector('.firefall');
+    const flameCount = 30; // Número de llamas
 
-    // Lista de colores para el efecto Año Nuevo
-    const colors = ['#FF5733', '#FFC300', '#DAF7A6', '#33FF57', '#33C3FF', '#FF33F0', '#FF3333'];
+    // Lista de colores para el fuego
+    const colors = ['#FF4500', '#FF6347', '#FF8C00', '#FFD700'];
 
-    // Función para generar un copo de nieve
-    function createSnowflake() {
-      const snowflake = document.createElement('i');
-      snowflake.classList.add('fas', 'fa-snowflake', 'snowflake');
+    // Función para generar una llama
+    function createFlame() {
+      const flame = document.createElement('i');
+      flame.classList.add('fas', 'fa-fire', 'flame');
 
-      // Estilo aleatorio para cada copo
-      snowflake.style.left = Math.random() * 100 + 'vw';
-      snowflake.style.animationDuration = Math.random() * 5 + 3 + 's';
-      snowflake.style.animationDelay = Math.random() * 3 + 's';
-      snowflake.style.setProperty('--direction', Math.random());
-      snowflake.style.setProperty('--color', colors[Math.floor(Math.random() * colors.length)]);
+      // Estilo aleatorio para cada llama
+      flame.style.left = Math.random() * 100 + 'vw';
+      flame.style.animationDuration = Math.random() * 3 + 3 + 's';
+      flame.style.animationDelay = Math.random() * 3 + 's';
+      flame.style.setProperty('--direction', Math.random() * 2 - 1); // Dirección aleatoria
+      flame.style.setProperty('--color', colors[Math.floor(Math.random() * colors.length)]);
 
-      snowfall.appendChild(snowflake);
+      firefall.appendChild(flame);
 
-      // Eliminar el copo de nieve después de que termine su animación
-      snowflake.addEventListener('animationend', () => {
-        snowflake.remove();
+      // Eliminar la llama después de que termine su animación
+      flame.addEventListener('animationend', () => {
+        flame.remove();
       });
     }
 
-    // Función para generar una hoja con nieve
-    function createLeaf() {
-      const leaf = document.createElement('div');
-      leaf.classList.add('leaf');
-
-      // Estilo aleatorio para cada hoja
-      leaf.style.left = Math.random() * 100 + 'vw';
-      leaf.style.animationDuration = Math.random() * 5 + 3 + 's';
-      leaf.style.animationDelay = Math.random() * 3 + 's';
-      leaf.style.setProperty('--direction', Math.random());
-
-      snowfall.appendChild(leaf);
-
-      // Eliminar la hoja después de que termine su animación
-      leaf.addEventListener('animationend', () => {
-        leaf.remove();
-      });
-    }
-
-    // Crear copos y hojas iniciales
-    for (let i = 0; i < snowflakeCount; i++) {
-      createSnowflake();
-    }
-    for (let i = 0; i < leafCount; i++) {
-      createLeaf();
+    // Crear llamas iniciales
+    for (let i = 0; i < flameCount; i++) {
+      createFlame();
     }
 
     // Animar continuamente
-    setInterval(createSnowflake, 500); // Crear un copo nuevo cada 500ms
-    setInterval(createLeaf, 1000); // Crear una hoja nueva cada 1000ms
+    setInterval(createFlame, 500); // Crear una llama nueva cada 500ms
   </script>
 </body>
 </html>
-
 
 
 <!DOCTYPE html>
