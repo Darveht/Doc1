@@ -254,21 +254,18 @@
 </html>
 
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fuego Estilo Realista</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
   <style>
     body {
       margin: 0;
       padding: 0;
       overflow: hidden;
       background: #000;
-      font-family: Arial, sans-serif;
     }
 
     /* Contenedor para el fuego */
@@ -286,31 +283,39 @@
     /* Cada llama */
     .flame {
       position: absolute;
-      top: -10px;
-      font-size: 30px;
-      color: orange;
-      animation: move linear infinite, flicker ease-in-out infinite;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 69, 0, 1) 0%, rgba(255, 165, 0, 1) 70%, rgba(255, 255, 0, 0) 100%);
+      animation: flicker 1.5s infinite, move 2s infinite;
+      pointer-events: none;
     }
 
-    /* Animación de fuego */
+    /* Animación de movimiento del fuego */
     @keyframes move {
       0% {
-        transform: translateY(0) translateX(0);
+        transform: translateY(0) scale(1);
         opacity: 1;
       }
       100% {
-        transform: translateY(100vh) translateX(calc(-50px + 100px * var(--direction)));
+        transform: translateY(100vh) scale(1.5);
         opacity: 0;
       }
     }
 
-    /* Efecto parpadeo del fuego */
+    /* Animación de parpadeo del fuego */
     @keyframes flicker {
-      0%, 100% {
-        box-shadow: 0 0 10px rgba(255, 69, 0, 0.8), 0 0 20px var(--color);
+      0% {
+        transform: scale(1) rotate(0);
+        opacity: 1;
       }
       50% {
-        box-shadow: 0 0 20px rgba(255, 69, 0, 0.4), 0 0 30px var(--color);
+        transform: scale(1.2) rotate(15deg);
+        opacity: 0.7;
+      }
+      100% {
+        transform: scale(1) rotate(-15deg);
+        opacity: 1;
       }
     }
   </style>
@@ -323,20 +328,14 @@
     const firefall = document.querySelector('.firefall');
     const flameCount = 30; // Número de llamas
 
-    // Lista de colores para el fuego
-    const colors = ['#FF4500', '#FF6347', '#FF8C00', '#FFD700'];
-
     // Función para generar una llama
     function createFlame() {
-      const flame = document.createElement('i');
-      flame.classList.add('fas', 'fa-fire', 'flame');
+      const flame = document.createElement('div');
+      flame.classList.add('flame');
 
       // Estilo aleatorio para cada llama
-      flame.style.left = Math.random() * 100 + 'vw';
-      flame.style.animationDuration = Math.random() * 3 + 3 + 's';
-      flame.style.animationDelay = Math.random() * 3 + 's';
-      flame.style.setProperty('--direction', Math.random() * 2 - 1); // Dirección aleatoria
-      flame.style.setProperty('--color', colors[Math.floor(Math.random() * colors.length)]);
+      flame.style.left = Math.random() * 100 + 'vw';  // Posición aleatoria
+      flame.style.animationDuration = Math.random() * 2 + 2 + 's'; // Duración aleatoria de animación
 
       firefall.appendChild(flame);
 
