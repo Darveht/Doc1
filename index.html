@@ -1,1219 +1,793 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Intro Estilo Discord</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      overflow-x: hidden;
-      background: linear-gradient(135deg, #2c2f33, #23272a);
-      font-family: Arial, sans-serif;
-      color: #fff;
-    }
-
-    .intro {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 9999;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      overflow: hidden;
-      background: linear-gradient(135deg, #2c2f33, #23272a);
-    }
-
-    .animation-container {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    .firework, .snowflake {
-      position: absolute;
-      background-color: #7289da;
-      border-radius: 50%;
-      animation: fadeOut 1.5s ease-out forwards;
-      pointer-events: none;
-    }
-
-    @keyframes fadeOut {
-      0% {
-        transform: scale(0);
-        opacity: 1;
-      }
-      100% {
-        transform: scale(20);
-        opacity: 0;
-      }
-    }
-
-    .snowflake {
-      background-color: #99aab5;
-      animation: fall 3s linear infinite;
-    }
-
-    @keyframes fall {
-      0% {
-        transform: translateY(-100px);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(100vh);
-        opacity: 0.5;
-      }
-    }
-
-    .wk {
-      font-size: 10rem;
-      font-weight: bold;
-      text-align: center;
-      background: linear-gradient(45deg, #7289da, #99aab5, #7289da);
-      color: transparent;
-      -webkit-background-clip: text;
-      background-clip: text;
-      animation: fadeIn 2s ease-in-out forwards, fadeOut 1s 4s forwards;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 1;
-    }
-
-    @keyframes fadeIn {
-      0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.5);
-      }
-      50% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.2);
-      }
-      100% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-      }
-    }
-
-    .screen-block {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #7289da; /* Fondo morado sólido */
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 10000;
-      text-align: center;
-      padding: 20px;
-    }
-
-    .screen-block button {
-      padding: 10px 20px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 20px;
-    }
-
-    .screen-block ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    .screen-block li {
-      margin: 10px 0;
-    }
-
-    .screen-block li i {
-      margin-right: 10px;
-    }
-
-    /* Media queries for mobile devices to adjust text margins */
-    @media (max-width: 600px) {
-      body {
-        padding: 10px;
-      }
-
-      .intro, .screen-block {
-        padding: 10px;
-      }
-
-      .wk {
-        font-size: 5rem;
-      }
-
-      .screen-block button {
-        padding: 8px 16px;
-        font-size: 14px;
-      }
-    }
-  </style>
-</head>
-<body>
-
-  <div class="intro">
-    <div class="animation-container"></div>
-    <div class="wk">WK</div>
-  </div>
-
-  <script>
-    const isAndroid = /Android/i.test(navigator.userAgent);
-    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-    const animationContainer = document.querySelector('.animation-container');
-
-    function createFirework() {
-      const firework = document.createElement('div');
-      firework.classList.add('firework');
-      const size = Math.random() * 50 + 20;
-      firework.style.width = `${size}px`;
-      firework.style.height = `${size}px`;
-      firework.style.left = `${Math.random() * window.innerWidth}px`;
-      firework.style.top = `${Math.random() * window.innerHeight}px`;
-      animationContainer.appendChild(firework);
-      setTimeout(() => firework.remove(), 1500);
-    }
-
-    function createSnowflake() {
-      const snowflake = document.createElement('div');
-      snowflake.classList.add('snowflake');
-      const size = Math.random() * 10 + 5;
-      snowflake.style.width = `${size}px`;
-      snowflake.style.height = `${size}px`;
-      snowflake.style.left = `${Math.random() * window.innerWidth}px`;
-      snowflake.style.animationDuration = `${Math.random() * 3 + 2}s`;
-      animationContainer.appendChild(snowflake);
-      setTimeout(() => snowflake.remove(), 3000);
-    }
-
-    if (isIOS) {
-      setInterval(createFirework, 300);
-    } else if (isAndroid) {
-      setInterval(createSnowflake, 200);
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-      if (!localStorage.getItem('updateShown')) {
-        setTimeout(() => {
-          document.querySelector('.intro').style.display = 'none';
-          showScreenBlock();
-        }, 5000);
-      } else {
-        document.querySelector('.intro').style.display = 'none';
-      }
-    });
-
-    function showScreenBlock() {
-      const screenBlock = document.createElement('div');
-      screenBlock.classList.add('screen-block');
-      screenBlock.innerHTML = `
-        <div>
-          <h1>Actualización Wkype 2.4.5</h1>
-          <p>Se han realizado las siguientes mejoras:</p>
-          <ul>
-            <li><i class="fas fa-shield-alt"></i>Mejoras en la seguridad y privacidad.</li>
-            <li><i class="fas fa-bug"></i>Corrección de errores y mejoras en el rendimiento.</li>
-            <li><i class="fas fa-user-alt"></i>Interfaz de usuario mejorada y más intuitiva.</li>
-            <li><i class="fas fa-search"></i>Función de búsqueda mejorada para resultados más rápidos.</li>
-            <li><i class="fas fa-language"></i>Nuevos idiomas disponibles: vietnamita, indonesio, hindi, árabe y portugués.</li>
-            <li><i class="fas fa-lock"></i>Mejoras en la privacidad de los usuarios.</li>
-          </ul>
-          <button onclick="closeScreenBlock()" id="close-button">Cerrar</button>
-        </div>
-      `;
-      document.body.appendChild(screenBlock);
-      localStorage.setItem('updateShown', 'true');
-    }
-
-    function closeScreenBlock() {
-      const screenBlock = document.querySelector('.screen-block');
-      if (screenBlock) {
-        screenBlock.remove();
-      }
-    }
-  </script>
-
-</body>
-</html>
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fuego Estilo Realista</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background: #000;
-    }
-
-    /* Contenedor para el fuego */
-    .firefall {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 9999;
-      will-change: transform;
-    }
-
-    /* Cada llama */
-    .flame {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 69, 0, 1) 0%, rgba(255, 165, 0, 1) 70%, rgba(255, 255, 0, 0) 100%);
-      animation: flicker 1.5s infinite, move 2s infinite;
-      pointer-events: none;
-    }
-
-    /* Animación de movimiento del fuego */
-    @keyframes move {
-      0% {
-        transform: translateY(0) scale(1);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(100vh) scale(1.5);
-        opacity: 0;
-      }
-    }
-
-    /* Animación de parpadeo del fuego */
-    @keyframes flicker {
-      0% {
-        transform: scale(1) rotate(0);
-        opacity: 1;
-      }
-      50% {
-        transform: scale(1.2) rotate(15deg);
-        opacity: 0.7;
-      }
-      100% {
-        transform: scale(1) rotate(-15deg);
-        opacity: 1;
-      }
-    }
-  </style>
-</head>
-<body>
-  <!-- Contenedor del fuego -->
-  <div class="firefall"></div>
-
-  <script>
-    const firefall = document.querySelector('.firefall');
-    const flameCount = 30; // Número de llamas
-
-    // Función para generar una llama
-    function createFlame() {
-      const flame = document.createElement('div');
-      flame.classList.add('flame');
-
-      // Estilo aleatorio para cada llama
-      flame.style.left = Math.random() * 100 + 'vw';  // Posición aleatoria
-      flame.style.animationDuration = Math.random() * 2 + 2 + 's'; // Duración aleatoria de animación
-
-      firefall.appendChild(flame);
-
-      // Eliminar la llama después de que termine su animación
-      flame.addEventListener('animationend', () => {
-        flame.remove();
-      });
-    }
-
-    // Crear llamas iniciales
-    for (let i = 0; i < flameCount; i++) {
-      createFlame();
-    }
-
-    // Animar continuamente
-    setInterval(createFlame, 500); // Crear una llama nueva cada 500ms
-  </script>
-</body>
-</html>
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Intro Animada</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #36393f;
-      color: #ffffff;
-      overflow: hidden;
-    }
-
-    .intro-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: #2f3136;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    .intro-content {
-      width: 100%;
-      max-width: 600px;
-      text-align: center;
-      overflow: hidden;
-    }
-
-    .intro-slide {
-      display: none;
-      opacity: 0;
-      transition: opacity 0.5s ease-in-out;
-      padding: 20px;
-    }
-
-    .intro-slide.active {
-      display: block;
-      opacity: 1;
-    }
-
-    h1 {
-      font-size: 2em;
-      margin-bottom: 0.5em;
-    }
-
-    .icon {
-      font-size: 6em;
-      margin-bottom: 1em;
-      color: #7289da;
-      transition: transform 0.5s ease;
-    }
-
-    p {
-      font-size: 1.1em;
-      margin-bottom: 1.5em;
-    }
-
-    button {
-      padding: 12px 24px;
-      margin: 8px;
-      border: none;
-      border-radius: 8px;
-      font-size: 1em;
-      cursor: pointer;
-      transition: background-color 0.3s, transform 0.3s ease;
-    }
-
-    .next-button {
-      background-color: #5865f2;
-      color: #ffffff;
-    }
-
-    .next-button:hover {
-      background-color: #4752c4;
-      transform: scale(1.05);
-    }
-
-    .skip-button {
-      background-color: #99aab5;
-      color: #ffffff;
-    }
-
-    .skip-button:hover {
-      background-color: #7289da;
-      transform: scale(1.05);
-    }
-
-    /* Nueva animación de comprimir */
-    @keyframes compress {
-      from {
-        transform: scale(1);
-        opacity: 1;
-      }
-      to {
-        transform: scale(0);
-        opacity: 0;
-      }
-    }
-
-    /* Estilo de la privacidad */
-    .privacy-block {
-      padding: 20px;
-      background-color: #43474d;
-      border-radius: 10px;
-      margin: 20px auto;
-      max-width: 500px;
-      text-align: left;
-    }
-
-    .privacy-option {
-      display: flex;
-      align-items: center;
-      margin: 10px 0;
-      cursor: pointer;
-      transition: background-color 0.3s;
-      padding: 10px;
-      border-radius: 8px;
-    }
-
-    .privacy-option:hover {
-      background-color: #5865f2;
-    }
-
-    .privacy-option i {
-      margin-right: 10px;
-      font-size: 1.5em;
-    }
-
-    .privacy-option span {
-      font-size: 1.1em;
-      color: #b9bbbe;
-    }
-
-    /* Estilo para verificar VPN */
-    .vpn-check {
-      display: none;
-      margin-top: 20px;
-      animation: fadeIn 1s ease;
-    }
-
-    .vpn-check.active {
-      display: block;
-    }
-
-    /* Animación fade-in */
-    @keyframes fadeIn {
-      0% { opacity: 0; }
-      100% { opacity: 1; }
-    }
-
-    /* Estilo del modal */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.7);
-      justify-content: center;
-      align-items: center;
-      z-index: 1001;
-    }
-
-    .modal-content {
-      background-color: #2f3136;
-      color: white;
-      padding: 30px;
-      border-radius: 10px;
-      text-align: center;
-      max-width: 500px;
-      width: 80%;
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .modal button {
-      background-color: #5865f2;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      margin-top: 20px;
-      cursor: pointer;
-    }
-
-    .modal button:hover {
-      background-color: #4752c4;
-    }
-  </style>
-</head>
-<body>
-
-<div id="intro-overlay" class="intro-overlay">
-  <div class="intro-content">
-    <!-- Slide 1 -->
-    <div class="intro-slide active">
-      <i class="fas fa-heart icon"></i>
-      <h1>Interactúa con artículos</h1>
-      <p>Da "Me gusta" y sigue tus artículos favoritos.</p>
-      <button class="next-button">Siguiente</button>
-      <button class="skip-button">Omitir</button>
-    </div>
-
-    <!-- Slide 2 -->
-    <div class="intro-slide">
-      <i class="fas fa-star icon"></i>
-      <h1>Recomendaciones diarias</h1>
-      <p>Descubre artículos seleccionados especialmente para ti cada día.</p>
-      <button class="next-button">Siguiente</button>
-      <button class="skip-button">Omitir</button>
-    </div>
-
-    <!-- Slide 3 -->
-    <div class="intro-slide">
-      <i class="fas fa-calendar-alt icon"></i>
-      <h1>Un día como hoy</h1>
-      <p>Descubre qué sucedió en la historia un día como hoy.</p>
-      <button class="next-button">Siguiente</button>
-      <button class="skip-button">Omitir</button>
-    </div>
-
-
-    <!-- Slide 4: Privacidad -->
-    <div class="intro-slide">
-      <i class="fas fa-shield-alt icon"></i>
-      <h1>Privacidad</h1>
-      <p>Nos comprometemos a proteger tu privacidad. Puedes activar o desactivar el rastreo de IP y más.</p>
-      
-      <!-- Bloque de opciones de privacidad con iconos interactivos -->
-      <div class="privacy-block">
-        <div class="privacy-option" id="ip-toggle" onclick="toggleIPTracking()">
-          <i class="fas fa-toggle-off" id="ip-icon"></i>
-          <span>Rastreo de IP</span>
-        </div>
-        <div class="privacy-option" id="vpn-toggle" onclick="toggleVPN()">
-          <i class="fas fa-toggle-off" id="vpn-icon"></i>
-          <span>Verificar VPN</span>
-        </div>
-      </div>
-      
-      <button class="next-button">Siguiente</button>
-      <button class="skip-button">Omitir</button>
-    </div>
-
-    <!-- Último Slide: "Empezar" -->
-    <div class="intro-slide">
-      <i class="fas fa-check-circle icon"></i>
-      <h1>Todo listo</h1>
-      <p>¡Ya puedes comenzar a disfrutar de la aplicación!</p>
-      <button class="skip-button">Empezar</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal para VPN -->
-<div id="vpn-modal" class="modal">
-  <div class="modal-content">
-    <h2>Verificación de VPN</h2>
-    <p>No se detectó VPN en tu conexión.</p>
-    <button onclick="closeModal('vpn-modal')">Cerrar</button>
-  </div>
-</div>
-
-<!-- Modal para Rastreo de IP -->
-<div id="ip-modal" class="modal">
-  <div class="modal-content">
-    <h2>Rastreo de IP</h2>
-    <p>El rastreo de IP está desactivado.</p>
-    <button onclick="closeModal('ip-modal')">Cerrar</button>
-  </div>
-</div>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const slides = document.querySelectorAll('.intro-slide');
-    const nextButtons = document.querySelectorAll('.next-button');
-    const skipButtons = document.querySelectorAll('.skip-button');
-    const introOverlay = document.getElementById('intro-overlay');
-    let currentSlide = 0;
-
-    function showSlide(index) {
-      slides.forEach((slide, i) => {
-        slide.classList.remove('active');
-        slide.style.opacity = 0;
-      });
-
-      const activeSlide = slides[index];
-      activeSlide.classList.add('active');
-      setTimeout(() => {
-        activeSlide.style.opacity = 1;
-      }, 10);
-    }
-
-    nextButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        if (currentSlide < slides.length - 1) {
-          currentSlide++;
-          showSlide(currentSlide);
-        }
-      });
-    });
-
-    skipButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        introOverlay.style.animation = 'compress 0.8s ease-in-out forwards';
-        setTimeout(() => {
-          introOverlay.style.display = 'none';
-          document.body.style.overflow = 'auto';
-        }, 800);
-      });
-    });
-
-  });
-
-  // Función de toggle para rastreo de IP
-  function toggleIPTracking() {
-    const ipIcon = document.getElementById('ip-icon');
-    const ipModal = document.getElementById('ip-modal');
-    if (ipIcon.classList.contains('fa-toggle-off')) {
-      ipIcon.classList.remove('fa-toggle-off');
-      ipIcon.classList.add('fa-toggle-on');
-      ipModal.classList.add('active');
-    } else {
-      ipIcon.classList.remove('fa-toggle-on');
-      ipIcon.classList.add('fa-toggle-off');
-      ipModal.classList.remove('active');
-    }
-  }
-
-  // Función de toggle para VPN
-  function toggleVPN() {
-    const vpnIcon = document.getElementById('vpn-icon');
-    const vpnModal = document.getElementById('vpn-modal');
-    if (vpnIcon.classList.contains('fa-toggle-off')) {
-      vpnIcon.classList.remove('fa-toggle-off');
-      vpnIcon.classList.add('fa-toggle-on');
-      vpnModal.classList.add('active');
-    } else {
-      vpnIcon.classList.remove('fa-toggle-on');
-      vpnIcon.classList.add('fa-toggle-off');
-      vpnModal.classList.remove('active');
-    }
-  }
-
-  function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    modal.classList.remove('active');
-  }
-</script>
-
-</body>
-</html>
-
-
-</html>
-<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Glam 2.5</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+  <title>WikiExplorer - Modern Wikipedia Search</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Roboto', sans-serif;
+    * {
       margin: 0;
       padding: 0;
-      background-color: #2f3136;
-      color: #dcddde;
+      box-sizing: border-box;
     }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #000;
+      color: #e7e9ea;
+      line-height: 1.5;
+    }
+
+    /* Header estilo Twitter */
     .header {
+      position: sticky;
+      top: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #2f3336;
+      padding: 12px 20px;
+      z-index: 1000;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      background-color: #202225;
-      color: #fff;
-      padding: 10px;
-      border-bottom: 1px solid #40444b;
-    }
-    .header input {
-      flex: 1;
-      padding: 10px;
-      font-size: 16px;
-      border: none;
-      border-radius: 5px;
-      margin-right: 10px;
-      background-color: #40444b;
-      color: #fff;
-    }
-    .header select {
-      padding: 10px;
-      font-size: 16px;
-      border: none;
-      border-radius: 5px;
-      background-color: #40444b;
-      color: #fff;
-      margin-right: 10px;
-      cursor: pointer;
-    }
-    .header button {
-      background-color: transparent;
-      color: #fff;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-    }
-    .header button:hover {
-      color: #7289da;
-    }
-    .grid-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
       gap: 20px;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #1d9bf0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .search-container {
+      flex: 1;
+      max-width: 600px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      background: #202327;
+      border: 1px solid #333639;
+      border-radius: 9999px;
+      padding: 12px 20px 12px 50px;
+      color: #e7e9ea;
+      font-size: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #1d9bf0;
+      background: #000;
+      box-shadow: 0 0 0 1px #1d9bf0;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #71767b;
+      font-size: 16px;
+    }
+
+    .language-select {
+      background: #16181c;
+      border: 1px solid #333639;
+      border-radius: 20px;
+      padding: 8px 16px;
+      color: #e7e9ea;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* Carrusel de artículos destacados */
+    .featured-section {
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 16px;
+      color: #e7e9ea;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .carousel-container {
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+      background: #16181c;
+      border: 1px solid #2f3336;
+    }
+
+    .carousel-track {
+      display: flex;
+      transition: transform 0.5s ease;
+    }
+
+    .carousel-item {
+      min-width: 100%;
+      padding: 24px;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .carousel-image {
+      width: 200px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 12px;
+      flex-shrink: 0;
+    }
+
+    .carousel-content h3 {
+      font-size: 24px;
+      margin-bottom: 8px;
+      color: #e7e9ea;
+    }
+
+    .carousel-content p {
+      color: #71767b;
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+
+    .carousel-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      border: none;
+      color: #e7e9ea;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .carousel-nav:hover {
+      background: rgba(29, 155, 240, 0.8);
+    }
+
+    .carousel-nav.prev {
+      left: 16px;
+    }
+
+    .carousel-nav.next {
+      right: 16px;
+    }
+
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #2f3336;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .dot.active {
+      background: #1d9bf0;
+    }
+
+    /* Contenedor principal */
+    .main-container {
+      max-width: 1200px;
+      margin: 0 auto;
       padding: 20px;
     }
-    .grid-item {
-      background-color: #3e4147;
-      padding: 20px;
-      width: 300px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-      border-radius: 10px;
-      text-align: center;
-      position: relative;
+
+    /* Grid de resultados mejorado */
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .result-card {
+      background: #16181c;
+      border: 1px solid #2f3336;
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      animation: fadeInUp 0.5s ease forwards;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .result-card:hover {
+      border-color: #1d9bf0;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(29, 155, 240, 0.15);
+    }
+
+    .card-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
       transition: transform 0.3s ease;
     }
-    .grid-item img {
-      width: 100%;
-      height: auto;
-      border-radius: 10px;
+
+    .result-card:hover .card-image {
+      transform: scale(1.05);
     }
-    .grid-item a {
-      display: inline-block;
-      margin-top: 10px;
-      padding: 10px 15px;
-      background-color: #7289da;
-      color: #fff;
-      border-radius: 5px;
-      text-decoration: none;
-      transition: background-color 0.3s ease;
+
+    .card-content {
+      padding: 16px;
     }
-    .grid-item a:hover {
-      background-color: #5b6eae;
+
+    .card-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #e7e9ea;
     }
+
+    .card-snippet {
+      color: #71767b;
+      margin-bottom: 16px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      background: transparent;
+      border: 1px solid #2f3336;
+      color: #e7e9ea;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .action-btn:hover {
+      background: #1d9bf0;
+      border-color: #1d9bf0;
+    }
+
+    .action-btn.liked {
+      background: #f91880;
+      border-color: #f91880;
+    }
+
+    .action-btn.following {
+      background: #1d9bf0;
+      border-color: #1d9bf0;
+    }
+
+    .action-btn.favorited {
+      background: #ffd400;
+      border-color: #ffd400;
+      color: #000;
+    }
+
+    /* Spinner mejorado */
+    .loading-container {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+
     .spinner {
-    display: none;
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #7289da;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 2s linear infinite, pulse 1.5s ease-in-out infinite;
-    margin: 20px auto;
-  }
+      width: 40px;
+      height: 40px;
+      border: 3px solid #2f3336;
+      border-top: 3px solid #1d9bf0;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
 
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
 
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-  }
-    .follow-btn, .like-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background-color: #7289da;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    padding: 10px 15px;
-    font-size: 14px;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-  }
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-  .follow-btn:hover, .like-btn:hover {
-    background-color: #5b6eae;
-    transform: scale(1.05);
-  }
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        gap: 12px;
+        padding: 16px;
+      }
 
-  .like-btn.liked {
-    background-color: #e74c3c;
-    color: #fff;
-  }
+      .carousel-item {
+        flex-direction: column;
+        text-align: center;
+      }
 
-  .follow-btn:active, .like-btn:active {
-    transform: scale(0.95);
-  }
+      .carousel-image {
+        width: 100%;
+        max-width: 300px;
+      }
 
-  .footer {
-    text-align: center;
-    padding: 20px;
-    background-color: #202225;
-    color: #fff;
-    border-top: 1px solid #40444b;
-  }
-   .report-btn {
-  background-color: #f39c12;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 15px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
+      .results-grid {
+        grid-template-columns: 1fr;
+      }
+    }
 
-.report-btn:hover {
-  background-color: #e67e22;
-}
+    /* Notificaciones */
+    .notification {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: #1d9bf0;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      z-index: 1001;
+    }
 
-.reported {
-  animation: reportAnimation 2s ease-in-out forwards;
-  color: red;
-  font-weight: bold;
-  font-size: 16px;
-  margin-top: 10px;
-}
+    .notification.show {
+      transform: translateX(0);
+    }
 
-@keyframes reportAnimation {
-  0% { opacity: 0; transform: scale(0.5); }
-  50% { opacity: 1; transform: scale(1.2); }
-  100% { opacity: 0; transform: scale(0.5); }
-}
-    .favorite-btn {
-  padding: 10px 20px;
-  font-size: 1rem;
-  color: white;
-  background: #007bff;
-  border: none;
-  border-radius: 5px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  transition: transform 0.3s ease, background 0.3s ease;
-}
+    /* Trending topics */
+    .trending-section {
+      margin-top: 40px;
+      padding: 20px;
+      background: #16181c;
+      border-radius: 16px;
+      border: 1px solid #2f3336;
+    }
 
-.favorite-btn:hover {
-  background: #0056b3;
-}
+    .trending-item {
+      padding: 12px 0;
+      border-bottom: 1px solid #2f3336;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
 
-.favorite-btn:active {
-  transform: scale(0.95);
-}
+    .trending-item:hover {
+      background: rgba(29, 155, 240, 0.1);
+    }
 
-.favorite-btn i {
-  font-size: 1.2rem;
-}
+    .trending-item:last-child {
+      border-bottom: none;
+    }
 
-.favorite-btn i.favorited {
-  color: #ffc107; /* Gold color for favorited */
-  animation: awesome 0.5s ease-out forwards;
-}
+    .trending-title {
+      font-weight: bold;
+      color: #e7e9ea;
+    }
 
-/* Animación Awesome */
-@keyframes awesome {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.5);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
+    .trending-stats {
+      font-size: 13px;
+      color: #71767b;
+    }
   </style>
 </head>
 <body>
-  <div class="header">
-    <input type="text" id="searchInput" placeholder="write something...">
-    <select id="languageSelect" onchange="updateLanguage()">
-      <option value="es">Español</option>
-      <option value="en">Inglés</option>
-      <option value="fr">Francés</option>
-      <option value="de">Alemán</option>
-      <option value="pt">Portugués</option>
-      <option value="it">Italiano</option>
-      <option value="ru" >Ruso</option>
-      <option value="ja">Japonés</option>
-      <option value="zh">Chino</option>
-      <option value="ar">Árabe</option>
-      <option value="ko">Coreano</option>
-      <option value="ca">Catalán</option>
-      <option value="tr">Turco</option>
-      <option value="vi" >Vietnamita</option>
-      <option value="th" >Tailandés</option>
-      <option value="hi" >Hindi</option>
-      <option value="pl">Polaco</option> 
-      <option value="nl">Neerlandés</option>
-      <option value="sv">Sueco</option> 
-      <option value="fi">Finlandés</option>
-      <option value="no">Noruego</option> 
-      <option value="da">Danés</option> 
-      <option value="el">Griego</option> 
-      <option value="he">Hebreo</option>
-      <option value="ro">Rumano</option> 
-      <option value="hu">Húngaro</option> 
-      <option value="cs">Checo</option> 
-      <option value="sk">Eslovaco</option>
-      <option value="bg">Búlgaro</option>
-      <option value="hr">Croata</option>
-      <option value="et">Estonio</option>
-      <option value="lv">Letón</option>
-      <option value="lt">Lituano</option>
-      <option value="mt">Maltés</option>
-      <option value="sr">Serbio</option>
-      <option value="sl">Esloveno</option>
-      <option value="uk">Ucraniano</option>
-      <option value="bn">Bengalí</option>
-      <option value="ta">Tamil</option>
-      <option value="te">Telugu</option>
-      <option value="kn">Canarés</option>
-      <option value="ml">Malayalam</option>
-      <option value="mr">Maratí</option>
-      <option value="ur">Urdu</option>
-      <option value="gu">Gujarati</option>
-      <option value="pa">Panyabí</option>
-      <option value="si">Cingalés</option>
-
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <i class="fab fa-wikipedia-w"></i>
+      WikiExplorer
+    </div>
+    <div class="search-container">
+      <i class="fas fa-search search-icon"></i>
+      <input type="text" class="search-input" id="searchInput" placeholder="¿Qué quieres descubrir hoy?">
+    </div>
+    <select class="language-select" id="languageSelect">
+      <option value="es">🇪🇸 Español</option>
+      <option value="en">🇺🇸 English</option>
+      <option value="fr">🇫🇷 Français</option>
+      <option value="de">🇩🇪 Deutsch</option>
+      <option value="pt">🇵🇹 Português</option>
+      <option value="it">🇮🇹 Italiano</option>
+      <option value="ru">🇷🇺 Русский</option>
+      <option value="ja">🇯🇵 日本語</option>
+      <option value="zh">🇨🇳 中文</option>
+      <option value="ar">🇸🇦 العربية</option>
     </select>
-    <button onclick="searchWikipedia()">
-      <i class="fas fa-search"></i>
-    </button>
-  </div>
+  </header>
 
-  <div id="gridContainer" class="grid-container"></div>
-  <div class="spinner" id="spinner"></div>
+  <!-- Carrusel de artículos destacados -->
+  <section class="featured-section">
+    <h2 class="section-title">
+      <i class="fas fa-fire"></i>
+      Artículos Destacados
+    </h2>
+    <div class="carousel-container">
+      <div class="carousel-track" id="carouselTrack">
+        <!-- Los artículos se cargarán dinámicamente -->
+      </div>
+      <button class="carousel-nav prev" onclick="prevSlide()">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <button class="carousel-nav next" onclick="nextSlide()">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+      <div class="carousel-dots" id="carouselDots"></div>
+    </div>
+  </section>
 
+  <!-- Contenedor principal -->
+  <main class="main-container">
+    <!-- Trending topics -->
+    <section class="trending-section">
+      <h3 class="section-title">
+        <i class="fas fa-chart-line"></i>
+        Tendencias de Hoy
+      </h3>
+      <div id="trendingTopics">
+        <!-- Se cargarán dinámicamente -->
+      </div>
+    </section>
+
+    <!-- Loading spinner -->
+    <div class="loading-container" id="loadingContainer">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Resultados de búsqueda -->
+    <div class="results-grid" id="resultsGrid"></div>
+  </main>
+
+  <!-- Notificación -->
+  <div class="notification" id="notification"></div>
 
   <script>
-    let language = 'es'; // Idioma predeterminado
+    let currentLanguage = 'es';
+    let currentSlide = 0;
+    let featuredArticles = [];
+    let carouselInterval;
+
     const translations = {
-      follow: {
-        es: 'Seguir',
-        en: 'Follow',
-        fr: 'Suivre',
-        de: 'Folgen',
-        pt: 'Seguir',
-        it: 'Segui',
-        ru: 'Следить',
-        ja: 'フォロー',
-        zh: '关注',
-        ar: 'متابعة',
-        ko: '팔로우',
-        ca: 'Seguir',
-        tr: 'Takip Et'
-        
-        
-      },
-      following: {
-        es: 'Siguiendo',
-        en: 'Following',
-        fr: 'Suivant',
-        de: 'Folgend',
-        pt: 'Seguindo',
-        it: 'Seguendo',
-        ru: 'Подписано',
-        ja: 'フォロー中',
-        zh: '已关注',
-        ar: 'متابع',
-        ko: '팔로잉',
-        ca: 'Seguint',
-        tr: 'Takip Ediyor'
-
-      },
-      like: {
-        es: 'Me gusta',
-        en: 'Like',
-        fr: 'J\'aime',
-        de: 'Gefällt mir',
-        pt: 'Curtir',
-        it: 'Mi piace',
-        ru: 'Нравится',
-        ja: 'いいね',
-        zh: '点赞',
-        ar: 'أعجبني',
-        ko: '좋아요',
-        ca: 'M agrada',
-        tr: 'Beğendim'
-
-      },
-      more: {
-        es: 'Ver más',
-        en: 'View more',
-        fr: 'Voir plus',
-        de: 'Mehr sehen',
-        pt: 'Ver mais',
-        it: 'Vedi di più',
-        ru: 'Посмотреть больше',
-        ja: 'もっと見る',
-        zh: '查看更多',
-        ar: 'عرض المزيد',
-        ko: '더 보기',
-        ca: 'Més informació',
-        tr: 'Daha Fazla'
-
-      },
-      report: {
-        es: 'Reportar',
-        en: 'Report',
-        fr: 'Signaler',
-        de: 'Melden',
-        pt: 'Denunciar',
-        it: 'Segnala',
-        ru: 'Пожаловаться',
-        ja: '報告',
-        zh: '举报',
-        ar: 'الإبلاغ',
-        ko: '신고',
-        ca: 'Denunciar',
-        tr: 'Şikayet Et'
-
-      }
+      follow: { es: 'Seguir', en: 'Follow', fr: 'Suivre', de: 'Folgen', pt: 'Seguir', it: 'Segui', ru: 'Подписаться', ja: 'フォロー', zh: '关注', ar: 'متابعة' },
+      following: { es: 'Siguiendo', en: 'Following', fr: 'Suivi', de: 'Folgt', pt: 'Seguindo', it: 'Seguito', ru: 'Подписан', ja: 'フォロー中', zh: '已关注', ar: 'متابع' },
+      like: { es: 'Me gusta', en: 'Like', fr: 'J\'aime', de: 'Gefällt mir', pt: 'Curtir', it: 'Mi piace', ru: 'Нравится', ja: 'いいね', zh: '点赞', ar: 'أعجبني' },
+      favorite: { es: 'Favorito', en: 'Favorite', fr: 'Favori', de: 'Favorit', pt: 'Favorito', it: 'Preferito', ru: 'Избранное', ja: 'お気に入り', zh: '收藏', ar: 'مفضل' },
+      readMore: { es: 'Leer más', en: 'Read more', fr: 'Lire plus', de: 'Mehr lesen', pt: 'Ler mais', it: 'Leggi di più', ru: 'Читать далее', ja: 'もっと読む', zh: '阅读更多', ar: 'اقرأ المزيد' }
     };
 
-    function updateLanguage() {
-      language = document.getElementById('languageSelect').value;
+    const trendingTopics = [
+      { title: 'Inteligencia Artificial', views: '1.2M artículos' },
+      { title: 'Cambio Climático', views: '890K artículos' },
+      { title: 'Exploración Espacial', views: '650K artículos' },
+      { title: 'Biotecnología', views: '420K artículos' },
+      { title: 'Energías Renovables', views: '380K artículos' }
+    ];
+
+    // Inicializar la aplicación
+    document.addEventListener('DOMContentLoaded', function() {
+      loadFeaturedArticles();
+      loadTrendingTopics();
+      setupEventListeners();
+      startCarouselTimer();
+    });
+
+    function setupEventListeners() {
+      document.getElementById('searchInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          searchWikipedia();
+        }
+      });
+
+      document.getElementById('languageSelect').addEventListener('change', function() {
+        currentLanguage = this.value;
+        loadFeaturedArticles();
+      });
     }
 
-    function searchWikipedia() {
-      const query = document.getElementById('searchInput').value;
-      const gridContainer = document.getElementById('gridContainer');
-      gridContainer.innerHTML = '';
-      showSpinner(true);
+    function loadFeaturedArticles() {
+      const featuredQueries = ['Ciencia', 'Tecnología', 'Historia', 'Arte', 'Naturaleza'];
+      const randomQuery = featuredQueries[Math.floor(Math.random() * featuredQueries.length)];
 
-      const url = `https://${language}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${query}&utf8=&format=json&origin=*`;
+      const url = `https://${currentLanguage}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${randomQuery}&srlimit=5&format=json&origin=*`;
+
       fetch(url)
         .then(response => response.json())
         .then(data => {
           const results = data.query.search;
-          fetchImagesForResults(results); // Obtener imágenes
+          fetchImagesForFeatured(results);
         })
-        .catch(() => {
-          alert('Error al buscar en Wikipedia. Inténtalo nuevamente.');
-          showSpinner(false);
+        .catch(error => console.error('Error loading featured articles:', error));
+    }
+
+    function fetchImagesForFeatured(articles) {
+      const imagePromises = articles.map(article => {
+        return fetch(`https://${currentLanguage}.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${article.title}&pithumbsize=400&format=json&origin=*`)
+          .then(response => response.json())
+          .then(data => {
+            const page = data.query.pages[Object.keys(data.query.pages)[0]];
+            const imageUrl = page.thumbnail ? page.thumbnail.source : 'https://via.placeholder.com/400x300/1d9bf0/ffffff?text=Wikipedia';
+            return {
+              title: article.title,
+              snippet: article.snippet,
+              imageUrl: imageUrl,
+              pageUrl: `https://${currentLanguage}.wikipedia.org/?curid=${article.pageid}`
+            };
+          });
+      });
+
+      Promise.all(imagePromises).then(articlesWithImages => {
+        featuredArticles = articlesWithImages;
+        displayFeaturedArticles();
+      });
+    }
+
+    function displayFeaturedArticles() {
+      const track = document.getElementById('carouselTrack');
+      const dots = document.getElementById('carouselDots');
+
+      track.innerHTML = '';
+      dots.innerHTML = '';
+
+      featuredArticles.forEach((article, index) => {
+        // Crear slide
+        const slide = document.createElement('div');
+        slide.className = 'carousel-item';
+        slide.innerHTML = `
+          <img src="${article.imageUrl}" alt="${article.title}" class="carousel-image">
+          <div class="carousel-content">
+            <h3>${article.title}</h3>
+            <p>${article.snippet}...</p>
+            <button class="action-btn" onclick="window.open('${article.pageUrl}', '_blank')">
+              <i class="fas fa-external-link-alt"></i>
+              ${translations.readMore[currentLanguage]}
+            </button>
+          </div>
+        `;
+        track.appendChild(slide);
+
+        // Crear dot
+        const dot = document.createElement('div');
+        dot.className = `dot ${index === 0 ? 'active' : ''}`;
+        dot.onclick = () => goToSlide(index);
+        dots.appendChild(dot);
+      });
+    }
+
+    function loadTrendingTopics() {
+      const container = document.getElementById('trendingTopics');
+      container.innerHTML = '';
+
+      trendingTopics.forEach(topic => {
+        const item = document.createElement('div');
+        item.className = 'trending-item';
+        item.innerHTML = `
+          <div class="trending-title">${topic.title}</div>
+          <div class="trending-stats">${topic.views}</div>
+        `;
+        item.onclick = () => searchSpecific(topic.title);
+        container.appendChild(item);
+      });
+    }
+
+    function searchSpecific(query) {
+      document.getElementById('searchInput').value = query;
+      searchWikipedia();
+    }
+
+    function searchWikipedia() {
+      const query = document.getElementById('searchInput').value;
+      if (!query.trim()) return;
+
+      const grid = document.getElementById('resultsGrid');
+      const loading = document.getElementById('loadingContainer');
+
+      grid.innerHTML = '';
+      loading.style.display = 'flex';
+
+      const url = `https://${currentLanguage}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${query}&srlimit=12&format=json&origin=*`;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          const results = data.query.search;
+          fetchImagesForResults(results);
+        })
+        .catch(error => {
+          console.error('Error searching Wikipedia:', error);
+          showNotification('Error en la búsqueda. Inténtalo de nuevo.');
+          loading.style.display = 'none';
         });
     }
 
     function fetchImagesForResults(results) {
-      const gridContainer = document.getElementById('gridContainer');
       const imagePromises = results.map(result => {
-        const pageUrl = `https://${language}.wikipedia.org/?curid=${result.pageid}`;
-        return fetch(`https://${language}.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${result.title}&pithumbsize=500&format=json&origin=*`)
+        return fetch(`https://${currentLanguage}.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${result.title}&pithumbsize=400&format=json&origin=*`)
           .then(response => response.json())
           .then(data => {
             const page = data.query.pages[Object.keys(data.query.pages)[0]];
-            const imageUrl = page.thumbnail ? page.thumbnail.source : 'https://via.placeholder.com/300';
-            return { title: result.title, snippet: result.snippet, imageUrl, pageUrl };
+            const imageUrl = page.thumbnail ? page.thumbnail.source : 'https://via.placeholder.com/400x300/16181c/e7e9ea?text=' + encodeURIComponent(result.title);
+            return {
+              title: result.title,
+              snippet: result.snippet,
+              imageUrl: imageUrl,
+              pageUrl: `https://${currentLanguage}.wikipedia.org/?curid=${result.pageid}`
+            };
           });
       });
 
       Promise.all(imagePromises).then(resultsWithImages => {
         displayResults(resultsWithImages);
-        showSpinner(false);
+        document.getElementById('loadingContainer').style.display = 'none';
       });
     }
 
     function displayResults(results) {
-      const gridContainer = document.getElementById('gridContainer');
-      gridContainer.innerHTML = '';
-      results.forEach(result => {
-        const gridItem = document.createElement('div');
-        gridItem.classList.add('grid-item');
-        gridItem.innerHTML = `
-          <img src="${result.imageUrl}" alt="${result.title}">
-          <h4>${result.title}</h4>
-          <p>${result.snippet}...</p>
-          <a href="${result.pageUrl}" target="_blank">${translations.more[language]}</a>
-          <button class="follow-btn" onclick="toggleFollow(this)">
-            <i class="fas fa-plus-circle"></i> ${translations.follow[language]}
-          </button>
-          <button class="like-btn" onclick="toggleLike(this)">
-            <i class="fas fa-heart"></i> ${translations.like[language]}
-          </button>
-          <button class="report-btn" onclick="reportItem(this)">
-  <i class="fas fa-flag"></i> ${translations.report[language]}
-</button>
-<div class="report-message"></div>
-          
-                    <button class="favorite-btn" onclick="toggleFavorite(this)">
-  <i class="fas fa-star"></i> Añadir a Favoritos
-</button>   
+      const grid = document.getElementById('resultsGrid');
+      grid.innerHTML = '';
 
+      results.forEach((result, index) => {
+        const card = document.createElement('div');
+        card.className = 'result-card';
+        card.style.animationDelay = `${index * 0.1}s`;
 
-
+        card.innerHTML = `
+          <img src="${result.imageUrl}" alt="${result.title}" class="card-image">
+          <div class="card-content">
+            <h3 class="card-title">${result.title}</h3>
+            <p class="card-snippet">${result.snippet}...</p>
+            <div class="card-actions">
+              <button class="action-btn" onclick="window.open('${result.pageUrl}', '_blank')">
+                <i class="fas fa-external-link-alt"></i>
+                ${translations.readMore[currentLanguage]}
+              </button>
+              <button class="action-btn" onclick="toggleLike(this)">
+                <i class="far fa-heart"></i>
+                ${translations.like[currentLanguage]}
+              </button>
+              <button class="action-btn" onclick="toggleFollow(this)">
+                <i class="fas fa-plus"></i>
+                ${translations.follow[currentLanguage]}
+              </button>
+              <button class="action-btn" onclick="toggleFavorite(this)">
+                <i class="far fa-star"></i>
+                ${translations.favorite[currentLanguage]}
+              </button>
+            </div>
+          </div>
         `;
-        gridContainer.appendChild(gridItem);
+
+        grid.appendChild(card);
       });
     }
 
-    function toggleFollow(button) {
-      const isFollowing = button.innerText.includes(translations.following[language]);
-      button.innerHTML = isFollowing
-        ? `<i class="fas fa-plus-circle"></i> ${translations.follow[language]}`
-        : `<i class="fas fa-check-circle"></i> ${translations.following[language]}`;
+    // Funciones del carrusel
+    function nextSlide() {
+      currentSlide = (currentSlide + 1) % featuredArticles.length;
+      updateCarousel();
     }
 
+    function prevSlide() {
+      currentSlide = (currentSlide - 1 + featuredArticles.length) % featuredArticles.length;
+      updateCarousel();
+    }
+
+    function goToSlide(index) {
+      currentSlide = index;
+      updateCarousel();
+    }
+
+    function updateCarousel() {
+      const track = document.getElementById('carouselTrack');
+      const dots = document.querySelectorAll('.dot');
+
+      track.style.transform = `translateX(-${currentSlide * 100}%)`;
+
+      dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentSlide);
+      });
+    }
+
+    function startCarouselTimer() {
+      carouselInterval = setInterval(() => {
+        nextSlide();
+      }, 7000); // Cambiar cada 7 segundos
+    }
+
+    function stopCarouselTimer() {
+      clearInterval(carouselInterval);
+    }
+
+    // Pausar carrusel al hacer hover
+    document.addEventListener('DOMContentLoaded', function() {
+      const carousel = document.querySelector('.carousel-container');
+      if (carousel) {
+        carousel.addEventListener('mouseenter', stopCarouselTimer);
+        carousel.addEventListener('mouseleave', startCarouselTimer);
+      }
+    });
+
+    // Funciones de interacción
     function toggleLike(button) {
       button.classList.toggle('liked');
+      const icon = button.querySelector('i');
+
+      if (button.classList.contains('liked')) {
+        icon.className = 'fas fa-heart';
+        showNotification('¡Te gusta este artículo!');
+      } else {
+        icon.className = 'far fa-heart';
+      }
     }
 
-    function reportItem(button) {
-      const reportMessage = button.nextElementSibling;
-      reportMessage.innerText = 'Item reported';
-      reportMessage.style.display = 'block';
-      setTimeout(() => reportMessage.style.display = 'none', 3000);
+    function toggleFollow(button) {
+      button.classList.toggle('following');
+      const icon = button.querySelector('i');
+
+      if (button.classList.contains('following')) {
+        icon.className = 'fas fa-check';
+        button.innerHTML = `<i class="fas fa-check"></i> ${translations.following[currentLanguage]}`;
+        showNotification('Ahora sigues este tema');
+      } else {
+        icon.className = 'fas fa-plus';
+        button.innerHTML = `<i class="fas fa-plus"></i> ${translations.follow[currentLanguage]}`;
+      }
     }
- function toggleFavorite(button) {
-  const icon = button.querySelector('i');
-  const isFavorite = icon.classList.contains('favorited');
 
-  if (isFavorite) {
-    // Remueve el estado de favorito
-    icon.classList.remove('favorited', 'fas');
-    icon.classList.add('far'); // Cambio a estilo vacío
-    button.innerHTML = `<i class="far fa-star"></i> Añadir a Favoritos`;
-  } else {
-    // Agrega el estado de favorito con animación
-    icon.classList.remove('far');
-    icon.classList.add('favorited', 'fas'); // Cambio a estilo lleno
-    button.innerHTML = `<i class="fas fa-star favorited"></i> Favorito`;
-  }
-}
+    function toggleFavorite(button) {
+      button.classList.toggle('favorited');
+      const icon = button.querySelector('i');
 
-
-    function 
-    
-    
-    showSpinner(show) {
-      const spinner = document.getElementById('spinner');
-      spinner.style.display = show ? 'block' : 'none';
+      if (button.classList.contains('favorited')) {
+        icon.className = 'fas fa-star';
+        showNotification('Añadido a favoritos');
+      } else {
+        icon.className = 'far fa-star';
+        showNotification('Removido de favoritos');
+      }
     }
+
+    function showNotification(message) {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.classList.add('show');
+
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
+    }
+
+    // Actualizar artículos destacados cada 7 minutos
+    setInterval(loadFeaturedArticles, 7 * 60 * 1000);
   </script>
 </body>
-<html>
-      
-  
-  
-  
+</html>
