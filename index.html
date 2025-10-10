@@ -1,793 +1,1861 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wkype</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wkype - Algoritmo ha Gemini</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Carga de íconos Lucide -->
+    <script type="module" src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <style>
+        /* CONFIGURACIÓN BASE DEL LAYOUT FIX */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            overflow: hidden;
+        }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #000;
-      color: #e7e9ea;
-      line-height: 1.5;
-    }
+        #main-app {
+            width: 100%;
+            max-width: 480px; 
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
 
-    /* Header estilo Twitter */
-    .header {
-      position: sticky;
-      top: 0;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid #2f3336;
-      padding: 12px 20px;
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
+        /* Contenedor del Feed: Ajustado para iniciar 6rem (24/4) por debajo de la nueva cabecera combinada */
+        #feed-container {
+            position: absolute;
+            top: 6rem; /* Nueva altura combinada (h-24 en tailwind) */
+            bottom: 4rem; 
+            width: 100%;
+            overflow-y: scroll;
+        }
+        
+        /* Estilos de scroll y loader */
+        #feed-container::-webkit-scrollbar { display: none; }
+        #feed-container { -ms-overflow-style: none; scrollbar-width: none; }
+        .loader { border: 4px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 4px solid #FE2C55; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* La tarjeta de artículo para el FEED (inmersivo) */
+        .article-card-feed {
+            min-height: 100%; 
+            scroll-snap-align: start; 
+            background: #111111;
+            padding-bottom: 2rem; 
+        }
 
-    .logo {
-      font-size: 24px;
-      font-weight: bold;
-      color: #1d9bf0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+        /* Estilos para el contenido del artículo (lector) */
+        #article-modal-content p {
+            margin-bottom: 1.5rem; 
+            line-height: 1.6;
+            font-size: 1.1rem;
+            color: #ccc;
+        }
+        #article-modal-content h4 {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #fff;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #FE2C55;
+            padding-bottom: 0.5rem;
+        }
+        
+        /* Clase para ocultar/mostrar la cabecera */
+        .header-hidden {
+            transform: translateY(-100%);
+        }
 
-    .search-container {
-      flex: 1;
-      max-width: 600px;
-      position: relative;
-    }
+        /* Clase para el modo de cuadrícula, sin snap */
+        .feed-snap {
+            scroll-snap-type: y mandatory;
+        }
 
-    .search-input {
-      width: 100%;
-      background: #202327;
-      border: 1px solid #333639;
-      border-radius: 9999px;
-      padding: 12px 20px 12px 50px;
-      color: #e7e9ea;
-      font-size: 15px;
-      transition: all 0.3s ease;
-    }
+        /* Estilos para el Tab Activo */
+        .tab-active {
+            font-weight: bold;
+            color: white;
+        }
+        .tab-active::after {
+            content: '';
+            display: block;
+            width: 50%;
+            height: 2px;
+            background-color: #FE2C55;
+            margin: 0 auto;
+            margin-top: 4px;
+        }
+        
+        /* CSS para el Toggle Switch */
+        .toggle-checkbox:checked {
+            @apply bg-wkype-main border-wkype-main;
+            right: 0;
+            transform: translateX(100%);
+        }
+        .toggle-checkbox {
+            height: 20px;
+            width: 20px;
+            transition: all 0.2s ease-in-out;
+            top: 2px; /* Alineación vertical */
+            left: 2px;
+            border: none !important; 
+        }
+        .toggle-label {
+             height: 24px;
+             width: 48px;
+             background-color: #555;
+             transition: background-color 0.2s ease-in-out;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #FE2C55;
+        }
 
-    .search-input:focus {
-      outline: none;
-      border-color: #1d9bf0;
-      background: #000;
-      box-shadow: 0 0 0 1px #1d9bf0;
-    }
+        /* ESTILO CORREGIDO: Área de escaneo/subida de documento (Ahora usa aspect-ratio) */
+        .scan-area {
+            border: 3px dashed #FE2C55;
+            background-color: #1a1a1a;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: block; /* Para posicionar hijos absolutos */
+            overflow: hidden; 
+            position: relative; /* Clave para el overlay */
+        }
+        .scan-area:hover {
+            background-color: #222222;
+        }
 
-    .search-icon {
-      position: absolute;
-      left: 20px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #71767b;
-      font-size: 16px;
-    }
-
-    .language-select {
-      background: #16181c;
-      border: 1px solid #333639;
-      border-radius: 20px;
-      padding: 8px 16px;
-      color: #e7e9ea;
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-    /* Carrusel de artículos destacados */
-    .featured-section {
-      padding: 20px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .section-title {
-      font-size: 20px;
-      font-weight: bold;
-      margin-bottom: 16px;
-      color: #e7e9ea;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .carousel-container {
-      position: relative;
-      overflow: hidden;
-      border-radius: 16px;
-      background: #16181c;
-      border: 1px solid #2f3336;
-    }
-
-    .carousel-track {
-      display: flex;
-      transition: transform 0.5s ease;
-    }
-
-    .carousel-item {
-      min-width: 100%;
-      padding: 24px;
-      display: flex;
-      gap: 20px;
-      align-items: center;
-    }
-
-    .carousel-image {
-      width: 200px;
-      height: 150px;
-      object-fit: cover;
-      border-radius: 12px;
-      flex-shrink: 0;
-    }
-
-    .carousel-content h3 {
-      font-size: 24px;
-      margin-bottom: 8px;
-      color: #e7e9ea;
-    }
-
-    .carousel-content p {
-      color: #71767b;
-      line-height: 1.4;
-      margin-bottom: 12px;
-    }
-
-    .carousel-nav {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(0, 0, 0, 0.7);
-      border: none;
-      color: #e7e9ea;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-    }
-
-    .carousel-nav:hover {
-      background: rgba(29, 155, 240, 0.8);
-    }
-
-    .carousel-nav.prev {
-      left: 16px;
-    }
-
-    .carousel-nav.next {
-      right: 16px;
-    }
-
-    .carousel-dots {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      padding: 16px;
-    }
-
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #2f3336;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .dot.active {
-      background: #1d9bf0;
-    }
-
-    /* Contenedor principal */
-    .main-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    /* Grid de resultados mejorado */
-    .results-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
-    }
-
-    .result-card {
-      background: #16181c;
-      border: 1px solid #2f3336;
-      border-radius: 16px;
-      overflow: hidden;
-      transition: all 0.3s ease;
-      animation: fadeInUp 0.5s ease forwards;
-      opacity: 0;
-      transform: translateY(20px);
-    }
-
-    .result-card:hover {
-      border-color: #1d9bf0;
-      transform: translateY(-4px);
-      box-shadow: 0 8px 25px rgba(29, 155, 240, 0.15);
-    }
-
-    .card-image {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      transition: transform 0.3s ease;
-    }
-
-    .result-card:hover .card-image {
-      transform: scale(1.05);
-    }
-
-    .card-content {
-      padding: 16px;
-    }
-
-    .card-title {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 8px;
-      color: #e7e9ea;
-    }
-
-    .card-snippet {
-      color: #71767b;
-      margin-bottom: 16px;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .card-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .action-btn {
-      background: transparent;
-      border: 1px solid #2f3336;
-      color: #e7e9ea;
-      padding: 8px 16px;
-      border-radius: 20px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 14px;
-      transition: all 0.3s ease;
-    }
-
-    .action-btn:hover {
-      background: #1d9bf0;
-      border-color: #1d9bf0;
-    }
-
-    .action-btn.liked {
-      background: #f91880;
-      border-color: #f91880;
-    }
-
-    .action-btn.following {
-      background: #1d9bf0;
-      border-color: #1d9bf0;
-    }
-
-    .action-btn.favorited {
-      background: #ffd400;
-      border-color: #ffd400;
-      color: #000;
-    }
-
-    /* Spinner mejorado */
-    .loading-container {
-      display: none;
-      justify-content: center;
-      align-items: center;
-      padding: 40px;
-    }
-
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid #2f3336;
-      border-top: 3px solid #1d9bf0;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    @keyframes fadeInUp {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .header {
-        flex-direction: column;
-        gap: 12px;
-        padding: 16px;
-      }
-
-      .carousel-item {
-        flex-direction: column;
-        text-align: center;
-      }
-
-      .carousel-image {
-        width: 100%;
-        max-width: 300px;
-      }
-
-      .results-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* Notificaciones */
-    .notification {
-      position: fixed;
-      top: 80px;
-      right: 20px;
-      background: #1d9bf0;
-      color: white;
-      padding: 12px 20px;
-      border-radius: 8px;
-      transform: translateX(100%);
-      transition: transform 0.3s ease;
-      z-index: 1001;
-    }
-
-    .notification.show {
-      transform: translateX(0);
-    }
-
-    /* Trending topics */
-    .trending-section {
-      margin-top: 40px;
-      padding: 20px;
-      background: #16181c;
-      border-radius: 16px;
-      border: 1px solid #2f3336;
-    }
-
-    .trending-item {
-      padding: 12px 0;
-      border-bottom: 1px solid #2f3336;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    .trending-item:hover {
-      background: rgba(29, 155, 240, 0.1);
-    }
-
-    .trending-item:last-child {
-      border-bottom: none;
-    }
-
-    .trending-title {
-      font-weight: bold;
-      color: #e7e9ea;
-    }
-
-    .trending-stats {
-      font-size: 13px;
-      color: #71767b;
-    }
-  </style>
+        /* ESTILO CORREGIDO: Imagen de vista previa dentro del contenedor */
+        #preview-image {
+            max-width: 100%; 
+            max-height: 100%; 
+            object-fit: contain; 
+            border-radius: 0.5rem; 
+            transition: opacity 0.3s;
+        }
+        
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'wkype-main': '#FE2C55',
+                        'wkype-dark': '#111111',
+                        'wkype-light': '#222222',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
 </head>
 <body>
-  <!-- Header -->
-  <header class="header">
-    <div class="logo">
-      <i class="fab fa-wikipedia-w"></i>
-      Wkype
-    </div>
-    <div class="search-container">
-      <i class="fas fa-search search-icon"></i>
-      <input type="text" class="search-input" id="searchInput" placeholder="¿Qué quieres descubrir hoy?">
-    </div>
-    <select class="language-select" id="languageSelect">
-      <option value="es"> Español</option>
-      <option value="en"> English</option>
-      <option value="fr"> Français</option>
-      <option value="de"> Deutsch</option>
-      <option value="pt"> Português</option>
-      <option value="it"> Italiano</option>
-      <option value="ru"> Русский</option>
-      <option value="ja"> 日本語</option>
-      <option value="zh"> 中文</option>
-      <option value="ar"> العربية</option>
-    </select>
-  </header>
 
-  <!-- Carrusel de artículos destacados -->
-  <section class="featured-section">
-    <h2 class="section-title">
-      <i class="fas fa-fire"></i>
-      Artículos Destacados
-    </h2>
-    <div class="carousel-container">
-      <div class="carousel-track" id="carouselTrack">
-        <!-- Los artículos se cargarán dinámicamente -->
-      </div>
-      <button class="carousel-nav prev" onclick="prevSlide()">
-        <i class="fas fa-chevron-left"></i>
-      </button>
-      <button class="carousel-nav next" onclick="nextSlide()">
-        <i class="fas fa-chevron-right"></i>
-      </button>
-      <div class="carousel-dots" id="carouselDots"></div>
-    </div>
-  </section>
+    <!-- CONTENEDOR PRINCIPAL DE LA APLICACIÓN -->
+    <div id="main-app">
 
-  <!-- Contenedor principal -->
-  <main class="main-container">
-    <!-- Trending topics -->
-    <section class="trending-section">
-      <h3 class="section-title">
-        <i class="fas fa-chart-line"></i>
-        Tendencias de Hoy
-      </h3>
-      <div id="trendingTopics">
-        <!-- Se cargarán dinámicamente -->
-      </div>
-    </section>
-
-    <!-- Loading spinner -->
-    <div class="loading-container" id="loadingContainer">
-      <div class="spinner"></div>
-    </div>
-
-    <!-- Resultados de búsqueda -->
-    <div class="results-grid" id="resultsGrid"></div>
-  </main>
-
-  <!-- Notificación -->
-  <div class="notification" id="notification"></div>
-
-  <script>
-    let currentLanguage = 'es';
-    let currentSlide = 0;
-    let featuredArticles = [];
-    let carouselInterval;
-
-    const translations = {
-      follow: { es: 'Seguir', en: 'Follow', fr: 'Suivre', de: 'Folgen', pt: 'Seguir', it: 'Segui', ru: 'Подписаться', ja: 'フォロー', zh: '关注', ar: 'متابعة' },
-      following: { es: 'Siguiendo', en: 'Following', fr: 'Suivi', de: 'Folgt', pt: 'Seguindo', it: 'Seguito', ru: 'Подписан', ja: 'フォロー中', zh: '已关注', ar: 'متابع' },
-      like: { es: 'Me gusta', en: 'Like', fr: 'J\'aime', de: 'Gefällt mir', pt: 'Curtir', it: 'Mi piace', ru: 'Нравится', ja: 'いいね', zh: '点赞', ar: 'أعجبني' },
-      favorite: { es: 'Favorito', en: 'Favorite', fr: 'Favori', de: 'Favorit', pt: 'Favorito', it: 'Preferito', ru: 'Избранное', ja: 'お気に入り', zh: '收藏', ar: 'مفضل' },
-      readMore: { es: 'Leer más', en: 'Read more', fr: 'Lire plus', de: 'Mehr lesen', pt: 'Ler mais', it: 'Leggi di più', ru: 'Читать далее', ja: 'もっと読む', zh: '阅读更多', ar: 'اقرأ المزيد' }
-    };
-
-    const trendingTopics = [
-      { title: 'Inteligencia Artificial', views: '1.2M artículos' },
-      { title: 'Cambio Climático', views: '890K artículos' },
-      { title: 'Exploración Espacial', views: '650K artículos' },
-      { title: 'Biotecnología', views: '420K artículos' },
-      { title: 'Energías Renovables', views: '380K artículos' }
-    ];
-
-    // Inicializar la aplicación
-    document.addEventListener('DOMContentLoaded', function() {
-      loadFeaturedArticles();
-      loadTrendingTopics();
-      setupEventListeners();
-      startCarouselTimer();
-    });
-
-    function setupEventListeners() {
-      document.getElementById('searchInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-          searchWikipedia();
-        }
-      });
-
-      document.getElementById('languageSelect').addEventListener('change', function() {
-        currentLanguage = this.value;
-        loadFeaturedArticles();
-      });
-    }
-
-    function loadFeaturedArticles() {
-      const featuredQueries = ['Ciencia', 'Tecnología', 'Historia', 'Arte', 'Naturaleza'];
-      const randomQuery = featuredQueries[Math.floor(Math.random() * featuredQueries.length)];
-
-      const url = `https://${currentLanguage}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${randomQuery}&srlimit=5&format=json&origin=*`;
-
-      fetch(url)
-        .then(response => response.json())
-        .then(data => {
-          const results = data.query.search;
-          fetchImagesForFeatured(results);
-        })
-        .catch(error => console.error('Error loading featured articles:', error));
-    }
-
-    function fetchImagesForFeatured(articles) {
-      const imagePromises = articles.map(article => {
-        return fetch(`https://${currentLanguage}.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${article.title}&pithumbsize=400&format=json&origin=*`)
-          .then(response => response.json())
-          .then(data => {
-            const page = data.query.pages[Object.keys(data.query.pages)[0]];
-            const imageUrl = page.thumbnail ? page.thumbnail.source : 'https://via.placeholder.com/400x300/1d9bf0/ffffff?text=Wikipedia';
-            return {
-              title: article.title,
-              snippet: article.snippet,
-              imageUrl: imageUrl,
-              pageUrl: `https://${currentLanguage}.wikipedia.org/?curid=${article.pageid}`
-            };
-          });
-      });
-
-      Promise.all(imagePromises).then(articlesWithImages => {
-        featuredArticles = articlesWithImages;
-        displayFeaturedArticles();
-      });
-    }
-
-    function displayFeaturedArticles() {
-      const track = document.getElementById('carouselTrack');
-      const dots = document.getElementById('carouselDots');
-
-      track.innerHTML = '';
-      dots.innerHTML = '';
-
-      featuredArticles.forEach((article, index) => {
-        // Crear slide
-        const slide = document.createElement('div');
-        slide.className = 'carousel-item';
-        slide.innerHTML = `
-          <img src="${article.imageUrl}" alt="${article.title}" class="carousel-image">
-          <div class="carousel-content">
-            <h3>${article.title}</h3>
-            <p>${article.snippet}...</p>
-            <button class="action-btn" onclick="window.open('${article.pageUrl}', '_blank')">
-              <i class="fas fa-external-link-alt"></i>
-              ${translations.readMore[currentLanguage]}
-            </button>
-          </div>
-        `;
-        track.appendChild(slide);
-
-        // Crear dot
-        const dot = document.createElement('div');
-        dot.className = `dot ${index === 0 ? 'active' : ''}`;
-        dot.onclick = () => goToSlide(index);
-        dots.appendChild(dot);
-      });
-    }
-
-    function loadTrendingTopics() {
-      const container = document.getElementById('trendingTopics');
-      container.innerHTML = '';
-
-      trendingTopics.forEach(topic => {
-        const item = document.createElement('div');
-        item.className = 'trending-item';
-        item.innerHTML = `
-          <div class="trending-title">${topic.title}</div>
-          <div class="trending-stats">${topic.views}</div>
-        `;
-        item.onclick = () => searchSpecific(topic.title);
-        container.appendChild(item);
-      });
-    }
-
-    function searchSpecific(query) {
-      document.getElementById('searchInput').value = query;
-      searchWikipedia();
-    }
-
-    function searchWikipedia() {
-      const query = document.getElementById('searchInput').value;
-      if (!query.trim()) return;
-
-      const grid = document.getElementById('resultsGrid');
-      const loading = document.getElementById('loadingContainer');
-
-      grid.innerHTML = '';
-      loading.style.display = 'flex';
-
-      const url = `https://${currentLanguage}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${query}&srlimit=12&format=json&origin=*`;
-
-      fetch(url)
-        .then(response => response.json())
-        .then(data => {
-          const results = data.query.search;
-          fetchImagesForResults(results);
-        })
-        .catch(error => {
-          console.error('Error searching Wikipedia:', error);
-          showNotification('Error en la búsqueda. Inténtalo de nuevo.');
-          loading.style.display = 'none';
-        });
-    }
-
-    function fetchImagesForResults(results) {
-      const imagePromises = results.map(result => {
-        return fetch(`https://${currentLanguage}.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${result.title}&pithumbsize=400&format=json&origin=*`)
-          .then(response => response.json())
-          .then(data => {
-            const page = data.query.pages[Object.keys(data.query.pages)[0]];
-            const imageUrl = page.thumbnail ? page.thumbnail.source : 'https://via.placeholder.com/400x300/16181c/e7e9ea?text=' + encodeURIComponent(result.title);
-            return {
-              title: result.title,
-              snippet: result.snippet,
-              imageUrl: imageUrl,
-              pageUrl: `https://${currentLanguage}.wikipedia.org/?curid=${result.pageid}`
-            };
-          });
-      });
-
-      Promise.all(imagePromises).then(resultsWithImages => {
-        displayResults(resultsWithImages);
-        document.getElementById('loadingContainer').style.display = 'none';
-      });
-    }
-
-    function displayResults(results) {
-      const grid = document.getElementById('resultsGrid');
-      grid.innerHTML = '';
-
-      results.forEach((result, index) => {
-        const card = document.createElement('div');
-        card.className = 'result-card';
-        card.style.animationDelay = `${index * 0.1}s`;
-
-        card.innerHTML = `
-          <img src="${result.imageUrl}" alt="${result.title}" class="card-image">
-          <div class="card-content">
-            <h3 class="card-title">${result.title}</h3>
-            <p class="card-snippet">${result.snippet}...</p>
-            <div class="card-actions">
-              <button class="action-btn" onclick="window.open('${result.pageUrl}', '_blank')">
-                <i class="fas fa-external-link-alt"></i>
-                ${translations.readMore[currentLanguage]}
-              </button>
-              <button class="action-btn" onclick="toggleLike(this)">
-                <i class="far fa-heart"></i>
-                ${translations.like[currentLanguage]}
-              </button>
-              <button class="action-btn" onclick="toggleFollow(this)">
-                <i class="fas fa-plus"></i>
-                ${translations.follow[currentLanguage]}
-              </button>
-              <button class="action-btn" onclick="toggleFavorite(this)">
-                <i class="far fa-star"></i>
-                ${translations.favorite[currentLanguage]}
-              </button>
+        <!-- CABECERA PRINCIPAL Y BARRA DE NAVEGACIÓN DEL FEED (NUEVO: H-24 (6rem) unificada) -->
+        <header id="header-main" class="fixed top-0 z-50 w-full max-w-[480px] bg-black h-24 flex flex-col px-4 shadow-xl transition-transform duration-300">
+            <!-- Fila 1: Título de la App y Status (h-12 / 3rem) -->
+            <div id="main-title-status" class="w-full flex justify-between items-center h-12">
+                <h1 class="text-3xl font-extrabold text-white">Wk<span class="text-wkype-main">ype</span></h1>
+                <div class="flex items-center space-x-3">
+                    <div id="loading-indicator" class="loader hidden"></div>
+                    <div id="user-info" class="text-sm text-gray-500 flex items-center">
+                        <i data-lucide="user" class="w-4 h-4 mr-1 text-gray-400"></i>
+                        <span id="user-id-display">Cargando...</span> 
+                    </div>
+                </div>
             </div>
-          </div>
-        `;
 
-        grid.appendChild(card);
-      });
-    }
+            <!-- Fila 2: Navegación "Explorar" / "Para Ti" (h-12 / 3rem) -->
+            <div id="feed-nav" class="flex justify-center items-center h-12 border-t border-wkype-light">
+                <button id="tab-explore" onclick="loadFeed('explore')" class="text-gray-400 mx-4 transition-colors p-1 text-lg">Explorar</button>
+                <button id="tab-foryou" onclick="loadFeed('foryou')" class="text-gray-400 mx-4 transition-colors p-1 text-lg">Para Ti</button>
+            </div>
+        </header>
+        
+        <!-- CABECERA DINÁMICA DE GUARDADOS (Aparece solo en saved, h-20 (5rem)) -->
+        <header id="header-saved" class="fixed top-0 z-50 w-full max-w-[480px] bg-black h-20 items-center px-4 shadow-xl hidden justify-between">
+            <h2 class="text-2xl font-bold text-white">Guardados</h2>
+            <button id="select-mode-button" onclick="toggleSelectionMode()" class="px-3 py-1 text-wkype-main font-semibold rounded-lg hover:bg-wkype-light transition">
+                Seleccionar
+            </button>
+        </header>
 
-    // Funciones del carrusel
-    function nextSlide() {
-      currentSlide = (currentSlide + 1) % featuredArticles.length;
-      updateCarousel();
-    }
+        <!-- CONTENEDOR DEL FEED / VISTAS (Scrollable Area) -->
+        <div id="feed-container" class="relative">
+            <!-- El contenido se inyecta aquí -->
+        </div>
 
-    function prevSlide() {
-      currentSlide = (currentSlide - 1 + featuredArticles.length) % featuredArticles.length;
-      updateCarousel();
-    }
+        <!-- BARRA DE ACCIONES PARA EL MODO SELECCIÓN -->
+        <div id="selection-actions-bar" class="fixed bottom-16 z-50 w-full max-w-[480px] bg-wkype-dark h-16 flex justify-center items-center border-t border-wkype-light shadow-2xl hidden">
+            <button onclick="deleteSelectedBookmarks()" class="px-6 py-3 bg-wkype-main text-white font-bold rounded-xl shadow-lg hover:opacity-90 transition flex items-center space-x-2">
+                <i data-lucide="trash-2" class="w-5 h-5"></i>
+                <span>Eliminar Seleccionados</span>
+            </button>
+        </div>
 
-    function goToSlide(index) {
-      currentSlide = index;
-      updateCarousel();
-    }
+        <!-- MODAL/PANTALLA DE BÚSQUEDA (CORREGIDO: Ahora muestra resultados aquí) -->
+        <div id="search-modal" class="fixed inset-0 bg-black z-[100] hidden flex flex-col items-center justify-start transition-opacity duration-300">
+            <!-- Header/Input Area -->
+            <div class="w-full max-w-[480px] p-4 bg-black flex flex-col border-b border-wkype-light sticky top-0 z-10">
+                <form id="search-form" onsubmit="event.preventDefault(); handleSearch();" class="w-full">
+                    <div class="relative flex items-center">
+                         <button type="button" onclick="closeSearchModal()" class="text-white p-2 mr-2">
+                            <i data-lucide="chevron-left" class="w-7 h-7"></i>
+                        </button>
+                        <input type="text" id="search-input" placeholder="Buscar en Wkype" 
+                               class="flex-grow p-3 pl-4 text-xl rounded-xl bg-wkype-light text-white placeholder-gray-500 focus:ring-2 focus:ring-wkype-main focus:outline-none">
+                        <button type="submit" class="absolute right-3 p-1 text-white hover:opacity-80 transition">
+                            <i data-lucide="search" class="w-6 h-6 text-gray-400"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Contenedor de Resultados de Búsqueda (Scrollable) -->
+            <div id="search-results-container" class="w-full max-w-[480px] flex-grow overflow-y-scroll p-4">
+                <!-- Contenido de interés (para pruebas rápidas) -->
+                <div id="search-initial-content" class="w-full mt-2 px-2">
+                    <h3 class="text-gray-400 font-semibold mb-3">Podría Interesarte</h3>
+                    <ul class="text-white text-lg space-y-3">
+                        <li onclick="handleSearch('Elon Musk')" class="flex items-center hover:opacity-80 transition cursor-pointer"><i data-lucide="dot" class="w-5 h-5 text-wkype-main"></i><span>Elon Musk</span></li>
+                        <li onclick="handleSearch('Inteligencia Artificial')" class="flex items-center hover:opacity-80 transition cursor-pointer"><i data-lucide="dot" class="w-5 h-5 text-wkype-main"></i><span>Inteligencia Artificial</span></li>
+                        <li onclick="handleSearch('Viaje a Marte')" class="flex items-center hover:opacity-80 transition cursor-pointer"><i data-lucide="dot" class="w-5 h-5 text-wkype-main"></i><span>Viaje a Marte</span></li>
+                        <li onclick="handleSearch('Cambio Climático')" class="flex items-center hover:opacity-80 transition cursor-pointer"><i data-lucide="dot" class="w-5 h-5 text-wkype-main"></i><span>Cambio Climático</span></li>
+                    </ul>
+                </div>
+                
+                <!-- Resultados se inyectan aquí -->
+                <div id="search-results-list" class="space-y-4"></div>
+            </div>
+        </div>
 
-    function updateCarousel() {
-      const track = document.getElementById('carouselTrack');
-      const dots = document.querySelectorAll('.dot');
+        <!-- MODAL LECTOR DE ARTÍCULO -->
+        <div id="article-reader-modal" class="fixed inset-0 bg-black z-[110] hidden flex flex-col transition-opacity duration-300">
+            <div class="h-16 flex items-center px-4 bg-black border-b border-wkype-light">
+                <button onclick="document.getElementById('article-reader-modal').classList.add('hidden')" class="text-white p-2">
+                    <i data-lucide="chevron-left" class="w-7 h-7"></i>
+                </button>
+                <h2 id="article-modal-title" class="text-xl font-bold text-white ml-4 truncate flex-grow">Título del Artículo</h2>
+            </div>
+            
+            <div id="article-modal-content" class="flex-grow overflow-y-scroll p-6">
+                <!-- Contenido completo inyectado aquí -->
+            </div>
+        </div>
+        
+        <!-- MODAL/PANTALLA DE PERSONAS SUGERIDAS (NUEVO) -->
+        <div id="people-modal" class="fixed inset-0 bg-black z-[100] hidden flex flex-col items-center justify-start transition-opacity duration-300">
+            <!-- Header -->
+            <div class="w-full max-w-[480px] h-16 p-4 bg-black flex items-center border-b border-wkype-light sticky top-0 z-10">
+                <button onclick="renderScreen('feed')" class="text-white p-2 mr-2">
+                    <i data-lucide="chevron-left" class="w-7 h-7"></i>
+                </button>
+                <h2 class="text-xl font-bold text-white flex-grow text-center pr-10">Personas Sugeridas</h2>
+            </div>
+            
+            <!-- Listado de Personas -->
+            <div id="suggested-people-list" class="w-full max-w-[480px] flex-grow overflow-y-scroll p-4 space-y-4">
+                <!-- Tarjetas de personas se inyectan aquí -->
+            </div>
+        </div>
 
-      track.style.transform = `translateX(-${currentSlide * 100}%)`;
+        <!-- MODAL/PANTALLA DE PERFIL (Darel, el CEO) (NUEVO) -->
+        <div id="profile-modal" class="fixed inset-0 bg-black z-[110] hidden flex flex-col transition-opacity duration-300">
+            <!-- Header con botón de regreso -->
+            <div class="h-16 flex items-center px-4 bg-black border-b border-wkype-light">
+                <button onclick="closeProfileModal()" class="text-white p-2">
+                    <i data-lucide="chevron-left" class="w-7 h-7"></i>
+                </button>
+                <h2 class="text-xl font-bold text-white ml-4 truncate flex-grow">Perfil</h2>
+            </div>
+            
+            <!-- Contenido del Perfil (Scrollable) -->
+            <div id="profile-content" class="flex-grow overflow-y-scroll p-6">
+                <!-- Se inyectará el contenido dinámico aquí -->
+            </div>
+        </div>
+        
+        <!-- MODAL DE AJUSTES -->
+        <div id="settings-modal" class="fixed inset-0 bg-black z-[100] hidden flex flex-col transition-transform duration-300 transform translate-x-full">
+            <!-- Header (Fixed at top) -->
+            <header class="h-16 flex items-center px-4 bg-black border-b border-wkype-light sticky top-0">
+                <button onclick="closeSettingsModal()" class="text-white p-2 mr-4">
+                    <i data-lucide="chevron-left" class="w-7 h-7"></i>
+                </button>
+                <h2 class="text-xl font-bold text-white flex-grow">Ajustes y Privacidad</h2>
+            </header>
 
-      dots.forEach((dot, index) => {
-        dot.classList.toggle('active', index === currentSlide);
-      });
-    }
+            <!-- Content (Scrollable) -->
+            <div class="flex-grow overflow-y-scroll p-0">
+                
+                <!-- Sección 1: Cuenta -->
+                <div class="py-4 border-b border-wkype-light">
+                    <h3 class="text-gray-400 font-semibold px-4 mb-2">Cuenta</h3>
+                    <div class="space-y-1">
+                        <button onclick="displayModalMessage('Info', 'La gestión de la cuenta se implementará con Firebase.')" class="w-full flex justify-between items-center p-4 hover:bg-wkype-light transition">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="user-cog" class="w-5 h-5 text-white"></i>
+                                <span class="text-white text-base">Información de la Cuenta</span>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-5 h-5 text-gray-500"></i>
+                        </button>
+                        <!-- Llama al modal de verificación -->
+                        <button onclick="openVerificationModal()" class="w-full flex justify-between items-center p-4 hover:bg-wkype-light transition">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="fingerprint" class="w-5 h-5 text-wkype-main"></i>
+                                <span class="text-white text-base">Verificar Mi Cuenta</span>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-5 h-5 text-gray-500"></i>
+                        </button>
+                    </div>
+                </div>
 
-    function startCarouselTimer() {
-      carouselInterval = setInterval(() => {
-        nextSlide();
-      }, 7000); // Cambiar cada 7 segundos
-    }
+                <!-- Sección 2: Contenido y Algoritmo -->
+                <div class="py-4 border-b border-wkype-light">
+                    <h3 class="text-gray-400 font-semibold px-4 mb-2">Contenido y Algoritmo</h3>
+                    <div class="space-y-1">
+                        <!-- CAMBIO: Llama al nuevo modal de Intereses -->
+                        <button onclick="openInterestsModal()" class="w-full flex justify-between items-center p-4 hover:bg-wkype-light transition">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="layout-dashboard" class="w-5 h-5 text-wkype-main"></i>
+                                <span class="text-white text-base">Administrar Intereses ("Para Ti")</span>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-5 h-5 text-gray-500"></i>
+                        </button>
+                        
+                        <!-- Opción con Toggle Switch (Modo Local) -->
+                        <div class="w-full flex justify-between items-center p-4">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="cloud-off" class="w-5 h-5 text-white"></i>
+                                <span class="text-white text-base">Modo Local (Sin Base de Datos)</span>
+                            </div>
+                            <!-- Implementación del Switch (usando el CSS custom) -->
+                            <div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" id="localModeToggle" name="localModeToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" onchange="displayModalMessage('Modo Local', this.checked ? 'El modo local almacena la actividad solo en este navegador.' : 'Se recomienda usar una base de datos para persistencia.')" checked>
+                                <label for="localModeToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sección 3: Soporte y Acerca de -->
+                <div class="py-4">
+                    <h3 class="text-gray-400 font-semibold px-4 mb-2">Soporte y Acerca de</h3>
+                    <div class="space-y-1">
+                        <button onclick="showDataSourceInfo()" class="w-full flex justify-between items-center p-4 hover:bg-wkype-light transition">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="database" class="w-5 h-5 text-white"></i>
+                                <span class="text-white text-base">Fuente de Datos (Wikipedia)</span>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-5 h-5 text-gray-500"></i>
+                        </button>
+                        <button onclick="displayModalMessage('Versión', 'Wkype Alpha v1.0 - Desarrollado.')" class="w-full flex justify-between items-center p-4 hover:bg-wkype-light transition">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="contact" class="w-5 h-5 text-white"></i>
+                                <span class="text-white text-base">Acerca de Wkype</span>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-5 h-5 text-gray-500"></i>
+                        </button>
+                    </div>
+                </div>
 
-    function stopCarouselTimer() {
-      clearInterval(carouselInterval);
-    }
+                <!-- Espacio inferior para el scroll -->
+                <div class="h-16"></div> 
+            </div>
+        </div>
+        
+        <!-- MODAL DE ADMINISTRACIÓN DE INTERESES -->
+        <div id="interests-modal" class="fixed inset-0 bg-black z-[100] hidden flex flex-col transition-transform duration-300 transform translate-x-full">
+            <!-- Header (Fixed at top) -->
+            <header class="h-16 flex items-center px-4 bg-black border-b border-wkype-light sticky top-0">
+                <button onclick="closeInterestsModal()" class="text-white p-2 mr-4">
+                    <i data-lucide="chevron-left" class="w-7 h-7"></i>
+                </button>
+                <h2 class="text-xl font-bold text-white flex-grow">Administrar Intereses ("Para Ti")</h2>
+            </header>
 
-    // Pausar carrusel al hacer hover
-    document.addEventListener('DOMContentLoaded', function() {
-      const carousel = document.querySelector('.carousel-container');
-      if (carousel) {
-        carousel.addEventListener('mouseenter', stopCarouselTimer);
-        carousel.addEventListener('mouseleave', startCarouselTimer);
-      }
-    });
+            <!-- Content (Scrollable) -->
+            <div class="flex-grow overflow-y-scroll p-6 space-y-8">
+                
+                <!-- Descripción -->
+                <div class="p-4 bg-wkype-light rounded-xl">
+                    <h3 class="text-lg font-bold text-white mb-2 flex items-center"><i data-lucide="sparkles" class="w-5 h-5 mr-2 text-wkype-main"></i>Tu Perfil de Interés</h3>
+                    <p class="text-sm text-gray-300">Este perfil se genera analizando tus artículos guardados, leídos y tus búsquedas. Es la base de lo que ves en el feed "Para Ti".</p>
+                </div>
+                
+                <!-- Palabras Clave Actuales -->
+                <div class="space-y-4">
+                    <h3 class="text-gray-400 font-semibold">Palabras Clave Principales (<span id="interest-count">0</span> / 5)</h3>
+                    <div id="interest-keywords-list" class="flex flex-wrap gap-3">
+                        <!-- Keywords will be rendered here -->
+                    </div>
+                    <p id="no-interests-message" class="text-sm text-gray-500 hidden">Aún no hay suficiente actividad para generar un perfil de intereses. ¡Comienza a explorar!</p>
+                </div>
 
-    // Funciones de interacción
-    function toggleLike(button) {
-      button.classList.toggle('liked');
-      const icon = button.querySelector('i');
+                <!-- Historial de Interacciones (CORREGIDO: Ahora abre el nuevo modal) -->
+                <div class="pt-4 border-t border-wkype-light">
+                     <button onclick="openHistoryModal()" class="w-full text-left flex justify-between items-center p-4 hover:bg-wkype-light transition rounded-xl">
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="history" class="w-5 h-5 text-white"></i>
+                            <span class="text-white text-base">Ver Historial de Interacción</span>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-5 h-5 text-gray-500"></i>
+                    </button>
+                </div>
+                
+                
+            </div>
+            
+            <!-- Botón de Acción (Fixed at bottom) -->
+            <div class="p-4 bg-black border-t border-wkype-light sticky bottom-0">
+                 <button onclick="clearAllActivity()" class="w-full px-6 py-3 border border-red-700 text-red-500 font-bold rounded-xl shadow-lg hover:bg-red-900/30 transition flex items-center justify-center space-x-2">
+                    <i data-lucide="ban" class="w-5 h-5"></i>
+                    <span>Borrar Todo el Perfil de Intereses y Actividad</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- MODAL DE HISTORIAL DE INTERACCIÓN (NUEVO) -->
+        <div id="history-modal" class="fixed inset-0 bg-black z-[100] hidden flex flex-col transition-transform duration-300 transform translate-x-full">
+            <!-- Header (Fixed at top) -->
+            <header class="h-16 flex items-center px-4 bg-black border-b border-wkype-light sticky top-0">
+                <button onclick="closeHistoryModal()" class="text-white p-2 mr-4">
+                    <i data-lucide="chevron-left" class="w-7 h-7"></i>
+                </button>
+                <h2 class="text-xl font-bold text-white flex-grow">Historial de Interacción</h2>
+            </header>
 
-      if (button.classList.contains('liked')) {
-        icon.className = 'fas fa-heart';
-        showNotification('¡Te gusta este artículo!');
-      } else {
-        icon.className = 'far fa-heart';
-      }
-    }
+            <!-- Content (Scrollable) -->
+            <div class="flex-grow overflow-y-scroll p-6 space-y-8" id="history-content">
+                <!-- Secciones de historial se renderizarán aquí -->
+            </div>
+            
+            <!-- Botón para cerrar (opcional, ya hay uno arriba) -->
+            <div class="p-4 bg-black border-t border-wkype-light sticky bottom-0">
+                 <button onclick="closeHistoryModal()" class="w-full px-6 py-3 bg-wkype-main text-white font-bold rounded-xl shadow-lg hover:opacity-90 transition">
+                    Cerrar Historial
+                </button>
+            </div>
+        </div>
 
-    function toggleFollow(button) {
-      button.classList.toggle('following');
-      const icon = button.querySelector('i');
+        
+        <!-- MODAL: Verificación de Cuenta (Paso 1) - REDISEÑADO -->
+        <div id="verification-modal" class="fixed inset-0 bg-black z-[100] hidden flex flex-col transition-transform duration-300 transform translate-x-full">
+            <header class="h-16 flex items-center px-4 bg-black border-b border-wkype-light sticky top-0">
+                <button onclick="closeVerificationModal()" class="text-white p-2 mr-4">
+                    <i data-lucide="chevron-left" class="w-7 h-7"></i>
+                </button>
+                <h2 class="text-xl font-bold text-white flex-grow">Verificación de Identidad</h2>
+            </header>
+            
+            <div class="flex-grow overflow-y-scroll p-6 space-y-8">
+                
+                <!-- PASO 1: SELECCIÓN DE DOCUMENTO -->
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full bg-wkype-main/80 text-white font-bold">1</div>
+                        <h3 class="text-xl font-bold text-white">Selecciona tu documento</h3>
+                    </div>
+                    
+                    <!-- Selección de Documento MEJORADA -->
+                    <div class="flex space-x-4">
+                        <label class="flex-1 text-center cursor-pointer p-3 rounded-xl border-2 border-gray-700 hover:border-wkype-main transition-all has-[:checked]:border-wkype-main has-[:checked]:bg-wkype-dark/50">
+                            <input type="radio" name="doc_type" value="license" checked class="hidden" onchange="updateDocumentVisual('Licencia', 'ID Card')">
+                            <i data-lucide="scan" class="w-8 h-8 text-white mx-auto mb-1"></i>
+                            <span class="text-white text-sm block">Licencia</span>
+                        </label>
+                        <label class="flex-1 text-center cursor-pointer p-3 rounded-xl border-2 border-gray-700 hover:border-wkype-main transition-all has-[:checked]:border-wkype-main has-[:checked]:bg-wkype-dark/50">
+                            <input type="radio" name="doc_type" value="passport" class="hidden" onchange="updateDocumentVisual('Pasaporte', 'Passport')">
+                            <i data-lucide="book-open-check" class="w-8 h-8 text-white mx-auto mb-1"></i>
+                            <span class="text-white text-sm block">Pasaporte</span>
+                        </label>
+                    </div>
+                </div>
 
-      if (button.classList.contains('following')) {
-        icon.className = 'fas fa-check';
-        button.innerHTML = `<i class="fas fa-check"></i> ${translations.following[currentLanguage]}`;
-        showNotification('Ahora sigues este tema');
-      } else {
-        icon.className = 'fas fa-plus';
-        button.innerHTML = `<i class="fas fa-plus"></i> ${translations.follow[currentLanguage]}`;
-      }
-    }
+                <!-- PASO 2: SUBIR DOCUMENTO -->
+                <div class="space-y-4 pt-4 border-t border-wkype-light">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full bg-wkype-main/80 text-white font-bold">2</div>
+                        <h3 class="text-xl font-bold text-white">Sube o Escanea</h3>
+                    </div>
+                    
+                    <p class="text-sm text-gray-300">Asegúrate de que toda la información y las cuatro esquinas sean visibles y la foto no tenga reflejos.</p>
 
-    function toggleFavorite(button) {
-      button.classList.toggle('favorited');
-      const icon = button.querySelector('i');
+                    <!-- Área de Subida / Escaneo (Simula la forma de una tarjeta) -->
+                    <label for="document-upload" id="scan-label" class="scan-area rounded-xl transition-all aspect-[1.5/1] w-full">
+                        
+                        <!-- Contenido inicial (Overlay) -->
+                        <div id="scan-prompt" class="absolute inset-0 flex flex-col justify-center items-center p-4 text-center bg-wkype-light/50 backdrop-blur-sm rounded-xl">
+                            <i data-lucide="camera" class="w-10 h-10 text-wkype-main mb-3"></i>
+                            <p class="text-white font-bold text-lg">Toca para Tomar Foto o Subir</p>
+                            <p class="text-xs text-gray-400 mt-1">Sube la <span id="doc-side-text" class="font-semibold">frontal de tu Licencia</span>.</p>
+                        </div>
+                        
+                        <!-- Imagen de Previsualización (Ocupa todo el espacio) -->
+                        <img id="preview-image" src="" alt="Vista Previa del Documento" class="w-full h-full object-contain hidden relative z-10">
+                    </label>
+                    
+                    <!-- Input real de archivo (oculto) -->
+                    <input type="file" id="document-upload" accept="image/*" class="hidden" onchange="previewImage(event)">
+                </div>
 
-      if (button.classList.contains('favorited')) {
-        icon.className = 'fas fa-star';
-        showNotification('Añadido a favoritos');
-      } else {
-        icon.className = 'far fa-star';
-        showNotification('Removido de favoritos');
-      }
-    }
+            </div>
+            
+            <!-- Botón de Envío (Fijo en la parte inferior) -->
+            <div class="p-4 bg-black border-t border-wkype-light">
+                 <button onclick="submitVerification()" id="send-verification-btn" disabled class="w-full px-6 py-3 bg-gray-600 text-white font-bold rounded-xl shadow-lg transition-all disabled:opacity-50">
+                    Enviar Documentos
+                </button>
+            </div>
+        </div>
+        
+        <!-- MODAL: Verificación en Proceso (Paso 2) -->
+        <div id="verification-success-modal" class="fixed inset-0 bg-black z-[100] hidden flex flex-col items-center justify-center p-8">
+            <i data-lucide="check-circle" class="w-20 h-20 text-wkype-main mb-6"></i>
+            <h2 class="text-3xl font-bold text-white mb-3 text-center">¡Documentos Recibidos!</h2>
+            <p class="text-lg text-gray-400 text-center mb-10">Tu cuenta está ahora en estado **"Verificación en Proceso"**. Revisaremos los documentos y te notificaremos en breve.</p>
+            
+            <button onclick="closeVerificationSuccessModal()" class="w-full max-w-sm px-6 py-3 bg-wkype-main text-white font-bold rounded-xl shadow-lg hover:opacity-90 transition">
+                Volver a Ajustes
+            </button>
+        </div>
 
-    function showNotification(message) {
-      const notification = document.getElementById('notification');
-      notification.textContent = message;
-      notification.classList.add('show');
 
-      setTimeout(() => {
-        notification.classList.remove('show');
-      }, 3000);
-    }
+        <!-- BARRA DE NAVEGACIÓN INFERIOR (h-16 = 4rem) -->
+        <nav id="nav-bar" class="fixed bottom-0 z-50 w-full max-w-[480px] bg-black h-16 flex justify-around items-center border-t border-wkype-light shadow-2xl">
+            <button id="nav-feed" onclick="renderScreen('feed')" class="flex flex-col items-center text-wkype-main transition-colors">
+                <i data-lucide="home" class="w-6 h-6"></i>
+                <span class="text-xs font-medium">Inicio</span>
+            </button>
+            <button id="nav-search" onclick="openSearchModal()" class="flex flex-col items-center text-white/70 hover:text-white transition-colors">
+                <i data-lucide="search" class="w-6 h-6"></i>
+                <span class="text-xs font-medium">Buscar</span>
+            </button>
+            <button id="nav-people" onclick="renderScreen('people')" class="flex flex-col items-center text-white/70 hover:text-white transition-colors">
+                <i data-lucide="users" class="w-6 h-6"></i>
+                <span class="text-xs font-medium">Personas</span>
+            </button>
+            <button id="nav-saved" onclick="renderScreen('saved')" class="flex flex-col items-center text-white/70 hover:text-white transition-colors">
+                <i data-lucide="bookmark" class="w-6 h-6"></i>
+                <span class="text-xs font-medium">Guardados</span>
+            </button>
+            <button id="nav-settings" onclick="openSettingsModal()" class="flex flex-col items-center text-white/70 hover:text-white transition-colors">
+                <i data-lucide="settings" class="w-6 h-6"></i>
+                <span class="text-xs font-medium">Ajustes</span>
+            </button>
+        </nav>
+    </div>
 
-    // Actualizar artículos destacados cada 7 minutos
-    setInterval(loadFeaturedArticles, 7 * 60 * 1000);
-  </script>
+    <!-- Script principal de la aplicación -->
+    <script type="module">
+        // Configuración y Variables Globales
+        const WIKIPEDIA_BASE_URL = 'https://es.wikipedia.org/w/api.php';
+        const ACTIVITY_STORAGE_KEY = 'wkypeActivity'; // Clave unificada de almacenamiento
+        const LOAD_LIMIT = 5; // Cantidad de artículos a cargar por cada petición
+
+        // Referencias de Elementos DOM
+        const feedContainer = document.getElementById('feed-container');
+        const headerMain = document.getElementById('header-main');
+        const headerSaved = document.getElementById('header-saved');
+        const searchInput = document.getElementById('search-input');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const searchModal = document.getElementById('search-modal');
+        const searchResultsContainer = document.getElementById('search-results-list'); // Nuevo
+        const searchInitialContent = document.getElementById('search-initial-content'); // Nuevo
+        const settingsModal = document.getElementById('settings-modal');
+        const verificationModal = document.getElementById('verification-modal'); 
+        const verificationSuccessModal = document.getElementById('verification-success-modal'); 
+        const sendVerificationBtn = document.getElementById('send-verification-btn'); 
+        const previewImageElement = document.getElementById('preview-image'); 
+        const scanLabel = document.getElementById('scan-label'); 
+        const scanPrompt = document.getElementById('scan-prompt'); 
+        const docSideText = document.getElementById('doc-side-text'); 
+        
+        const articleReaderModal = document.getElementById('article-reader-modal');
+        const articleModalTitle = document.getElementById('article-modal-title');
+        const articleModalContent = document.getElementById('article-modal-content');
+        const historyModal = document.getElementById('history-modal'); // Nuevo
+        const historyContent = document.getElementById('history-content'); // Nuevo
+
+        // NUEVAS REFERENCIAS PARA PERSONAS Y PERFIL
+        const peopleModal = document.getElementById('people-modal');
+        const suggestedPeopleList = document.getElementById('suggested-people-list');
+        const profileModal = document.getElementById('profile-modal');
+        const profileContent = document.getElementById('profile-content');
+        
+        let currentScreen = 'feed'; // 'feed' | 'saved' | 'people'
+        let currentFeedMode = 'explore'; // 'explore' | 'foryou'
+        let currentArticles = []; 
+        let currentSearchResults = []; // Usado para resultados de búsqueda
+        let originalArticleContent = ''; 
+        let verificationFile = null; 
+        
+        // Almacenamiento de actividad del usuario
+        let wkypeActivity = { // Estructura de actividad unificada
+            bookmarks: {},
+            searches: [],
+            reads: [],
+        };
+
+        // Data placeholder para las personas sugeridas
+        const suggestedPeopleData = [
+            { 
+                id: 'darel_ceo', 
+                name: 'Darel', 
+                tag: 'El CEO de Wkype', 
+                isOfficial: true,
+                readCount: '1.2M', 
+                reviewedCount: '30K', 
+                isFollowing: false,
+                bio: 'Innovador, visionario, y apasionado por el conocimiento. Liderando la revolución de la información abierta.'
+            },
+            { 
+                id: 'maya_editor', 
+                name: 'Maya R.', 
+                tag: 'Editora de Contenido Senior', 
+                isOfficial: true,
+                readCount: '850K', 
+                reviewedCount: '15K', 
+                isFollowing: true,
+                bio: 'Asegurando la calidad y neutralidad de los artículos en la plataforma.'
+            },
+            { 
+                id: 'dr_alfa', 
+                name: 'Dr. Alfa', 
+                tag: 'Asesor Científico', 
+                isOfficial: true,
+                readCount: '2.1M', 
+                reviewedCount: '5K', 
+                isFollowing: false,
+                bio: 'Enfocado en las últimas novedades en física y astronomía. Descubre el universo conmigo.'
+            }
+        ];
+        
+        // Variables para el algoritmo de "Para Ti"
+        let currentForyouOffset = 0; 
+        let currentForyouQuery = null; 
+        let topForyouKeywords = null; 
+        let currentSearchOffset = 0; // Offset para búsqueda dentro del modal
+
+        // Variables de UI
+        let isSelectionMode = false;
+        let selectedBookmarks = new Set();
+        let lastScrollTop = 0; 
+        let isLoading = false; 
+
+        
+        // --- Funciones de LocalStorage (Mantenidas) ---
+        function loadActivity() {
+            try {
+                const stored = localStorage.getItem(ACTIVITY_STORAGE_KEY);
+                wkypeActivity = stored ? JSON.parse(stored) : { bookmarks: {}, searches: [], reads: [] };
+                
+                // Asegurar que las estructuras existan
+                if (!wkypeActivity.bookmarks) wkypeActivity.bookmarks = {};
+                if (!wkypeActivity.searches) wkypeActivity.searches = [];
+                if (!wkypeActivity.reads) wkypeActivity.reads = [];
+            } catch (e) {
+                console.error("Error al cargar actividad de localStorage:", e);
+                wkypeActivity = { bookmarks: {}, searches: [], reads: [] };
+            }
+        }
+
+        function saveActivity() {
+            try {
+                localStorage.setItem(ACTIVITY_STORAGE_KEY, JSON.stringify(wkypeActivity));
+            } catch (e) {
+                console.error("Error al guardar actividad en localStorage:", e);
+            }
+        }
+
+        window.toggleBookmark = function(article) {
+            const articleId = article.id.toString();
+            const wasSaved = !!wkypeActivity.bookmarks[articleId];
+
+            if (wasSaved) {
+                delete wkypeActivity.bookmarks[articleId];
+                displayModalMessage('Eliminado', `${article.title} eliminado.`);
+            } else {
+                const dataToSave = {
+                    id: article.id,
+                    title: article.title,
+                    summary: article.summary,
+                    fullContent: article.fullContent, 
+                    url: article.url, 
+                    imageUrl: article.imageUrl || null,
+                    savedAt: new Date().toISOString()
+                };
+                wkypeActivity.bookmarks[articleId] = dataToSave;
+                displayModalMessage('Guardado', `${article.title} guardado.`);
+            }
+            saveActivity();
+            
+            // Lógica de Actualización de Ícono de Guardado
+            // Nota: Esto también se usa en el modal de búsqueda ahora
+            const isNowSaved = !wasSaved;
+            document.querySelectorAll(`.save-btn-${articleId}`).forEach(button => {
+                 button.innerHTML = `<i data-lucide="${isNowSaved ? 'bookmark-check' : 'bookmark'}" class="w-5 h-5"></i>`;
+                 button.classList.remove(isNowSaved ? 'bg-white/10' : 'bg-wkype-main');
+                 button.classList.add(isNowSaved ? 'bg-wkype-main' : 'bg-white/10');
+            });
+            lucide.createIcons();
+
+            if (currentScreen === 'saved') {
+                renderScreen('saved', true);
+            }
+        }
+        
+        // --- Algoritmo de Aprendizaje Holístico (Mantenido) ---
+
+        function generateInterestProfile() {
+            const keywordMap = {};
+            // Palabras comunes en español para ignorar (Stop Words)
+            const stopWords = new Set(['el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'de', 'en', 'y', 'o', 'del', 'al', 'con', 'para', 'que', 'es', 'su', 'por', 'lo', 'se', 'a', 'ante', 'bajo', 'cabe', 'desde', 'durante', 'mediante', 'versus', 'tras', 'sin', 'ni', '', ' ', 'es', 'no', 'si']);
+
+            // Función para tokenizar y aplicar peso
+            const tokenize = (text, weight) => {
+                // Eliminar caracteres especiales y convertir a minúsculas
+                const words = text.toLowerCase().split(/\W+/).filter(word => word.length > 2 && !stopWords.has(word));
+                words.forEach(word => {
+                    keywordMap[word] = (keywordMap[word] || 0) + weight;
+                });
+            };
+
+            // 1. Artículos Guardados (Peso: x3)
+            const savedTitles = Object.values(wkypeActivity.bookmarks).map(b => b.title);
+            savedTitles.forEach(title => tokenize(title, 3));
+
+            // 2. Consultas de Búsqueda (Peso: x2)
+            const searchQueries = wkypeActivity.searches.map(s => s.query);
+            searchQueries.forEach(query => tokenize(query, 2));
+
+            // 3. Artículos Leídos (Peso: x1)
+            const readTitles = wkypeActivity.reads.map(r => r.title);
+            readTitles.forEach(title => tokenize(title, 1));
+            
+            // Si no hay actividad, retorna nulo
+            if (Object.keys(keywordMap).length === 0) {
+                return null; 
+            }
+
+            // 4. Encontrar las 5 palabras clave más potentes
+            const sortedKeywords = Object.entries(keywordMap)
+                .sort(([, scoreA], [, scoreB]) => scoreB - scoreA) // Ordenar por puntuación descendente
+                .slice(0, 5) // Tomar solo las 5 principales
+                .map(([keyword]) => keyword); // Retornar solo las keywords
+
+            // Retornamos un array de las top 5 keywords para muestreo
+            return sortedKeywords.length > 0 ? sortedKeywords : null;
+        }
+
+
+        // --- Funciones de Wikipedia API (AJUSTADAS PARA LA BÚSQUEDA) ---
+        
+        window.openSearchModal = function() {
+            searchModal.classList.remove('hidden');
+            // Al abrir, si no hay resultados previos, muestra el contenido inicial
+            if (currentSearchResults.length === 0) {
+                 searchInitialContent.classList.remove('hidden');
+                 searchResultsContainer.innerHTML = '';
+            } else {
+                 searchInitialContent.classList.add('hidden');
+                 // Si ya hay resultados, se quedan renderizados
+            }
+            searchInput.focus();
+        }
+        
+        window.closeSearchModal = function() {
+            searchModal.classList.add('hidden');
+            // No reseteamos el currentSearchResults, por si el usuario vuelve
+        }
+
+
+        window.handleSearch = async function(queryOverride = null) {
+            const query = queryOverride || searchInput.value.trim();
+            if (!query) {
+                displayModalMessage('Ingresa un término', 'Escribe algo interesante para empezar a explorar.');
+                return;
+            }
+            
+            // REGISTRO DE ACTIVIDAD: Guardar la búsqueda
+            wkypeActivity.searches.push({ query: query, timestamp: new Date().toISOString() });
+            wkypeActivity.searches = wkypeActivity.searches.slice(-50); // Limitar a los últimos 50
+            saveActivity();
+            
+            // 1. Ocultar contenido inicial, mostrar loader
+            searchInitialContent.classList.add('hidden');
+            searchResultsContainer.innerHTML = `<div class="flex justify-center py-10"><div class="loader"></div></div>`;
+            showLoader(true);
+            
+            // 2. Cargar artículos
+            currentSearchOffset = 0; // Resetear offset
+            const results = await fetchArticlesBySearch(query, currentSearchOffset);
+            
+            showLoader(false);
+            currentSearchResults = results;
+            searchInput.value = query; // Asegurar que el input refleje el query
+
+            if (results.length > 0) {
+                renderSearchResults(results, true); 
+                // Asegurar que el scroll del contenedor de resultados empiece arriba
+                document.getElementById('search-results-container').scrollTop = 0; 
+            } else {
+                renderSearchMessage('No se encontraron resultados.', `No hay artículos para "${query}".`);
+            }
+        }
+        
+        // Función de carga más para la pantalla de búsqueda
+        async function loadMoreSearchResults(query) {
+            if (isLoading) return;
+            
+            isLoading = true;
+            searchResultsContainer.insertAdjacentHTML('beforeend', `<div id="search-loader-more" class="flex justify-center py-4"><div class="loader"></div></div>`);
+            
+            currentSearchOffset += LOAD_LIMIT; 
+            const newArticles = await fetchArticlesBySearch(query, currentSearchOffset);
+            
+            document.getElementById('search-loader-more')?.remove();
+            isLoading = false;
+
+            if (newArticles.length > 0) {
+                 currentSearchResults.push(...newArticles);
+                 renderSearchResults(newArticles, false);
+            } else {
+                 renderSearchMessage('No hay más resultados', `Fin de los resultados para "${query}".`);
+            }
+        }
+
+        window.loadFeed = async function(mode) {
+            if (isLoading && mode === currentFeedMode) return; 
+
+            // Si estamos en búsqueda, cerramos el modal antes de ir al feed
+            searchModal.classList.add('hidden');
+            
+            currentFeedMode = mode;
+            feedContainer.scrollTop = 0;
+            showLoader(true);
+            
+            // Actualizar pestañas
+            document.getElementById('tab-explore').classList.remove('tab-active');
+            document.getElementById('tab-foryou').classList.remove('tab-active');
+            document.getElementById(`tab-${mode}`).classList.add('tab-active');
+
+            let results = [];
+            
+            if (mode === 'explore') {
+                results = await fetchRandomArticles();
+            } else if (mode === 'foryou') {
+                topForyouKeywords = generateInterestProfile(); // Obtener el array de las top keywords
+                
+                if (topForyouKeywords && topForyouKeywords.length > 0) {
+                    currentForyouOffset = 0; // Reset offset 
+                    const randomIndex = Math.floor(Math.random() * topForyouKeywords.length);
+                    const randomKeyword = topForyouKeywords[randomIndex];
+                    currentForyouQuery = randomKeyword; 
+                    results = await fetchArticlesBySearch(randomKeyword, currentForyouOffset);
+                    
+                } else {
+                    showLoader(false);
+                    renderWelcomeScreen('foryou');
+                    return;
+                }
+            }
+            
+            showLoader(false);
+            currentArticles = results;
+
+            if (results.length > 0) {
+                renderArticles(results, true); // Limpia el feed para la nueva tanda inicial
+            } else {
+                 if (mode === 'foryou' && topForyouKeywords && topForyouKeywords.length > 1) {
+                     displayModalMessage('Aviso', `No hay resultados para "${currentForyouQuery}". Intentando con otro interés.`);
+                     currentForyouOffset = 0;
+                     isLoading = false;
+                     showLoader(false);
+                     return loadMoreArticles(); 
+                } else {
+                    displayMessage('No hay más artículos', 'Intenta buscar algo o desliza para más contenido.', 'feed');
+                }
+            }
+        }
+        
+        async function loadMoreArticles() {
+            if (isLoading || currentScreen !== 'feed') return;
+            
+            isLoading = true;
+            showLoader(true);
+            
+            let newArticles = [];
+
+            try {
+                if (currentFeedMode === 'explore') {
+                    newArticles = await fetchRandomArticles();
+                    
+                } else if (currentFeedMode === 'foryou') {
+                    if (topForyouKeywords && topForyouKeywords.length > 0) {
+                        currentForyouOffset += LOAD_LIMIT; 
+                        const randomIndex = Math.floor(Math.random() * topForyouKeywords.length);
+                        const randomKeyword = topForyouKeywords[randomIndex];
+                        currentForyouQuery = randomKeyword;
+                        
+                        newArticles = await fetchArticlesBySearch(randomKeyword, currentForyouOffset);
+                        
+                        if (newArticles.length === 0) {
+                             displayModalMessage('Aviso', `No hay más sobre "${randomKeyword}". Cambiando de tema.`);
+                             currentForyouOffset = 0;
+                             isLoading = false;
+                             showLoader(false);
+                             return loadMoreArticles(); 
+                        }
+
+                    } else {
+                        isLoading = false;
+                        showLoader(false);
+                        return;
+                    }
+                }
+
+                if (newArticles.length > 0) {
+                    const uniqueNewArticles = newArticles.filter(
+                        newArt => !currentArticles.some(existingArt => existingArt.id === newArt.id)
+                    );
+                    
+                    if (uniqueNewArticles.length > 0) {
+                        currentArticles.push(...uniqueNewArticles);
+                        renderArticles(uniqueNewArticles, false); 
+                    }
+                } else {
+                    displayModalMessage('Fin del Feed', 'No pudimos encontrar más artículos por ahora.');
+                }
+                
+            } catch (error) {
+                console.error("Error al cargar más artículos:", error);
+                displayModalMessage('Error', 'Hubo un error al cargar más artículos.');
+            } finally {
+                isLoading = false;
+                showLoader(false);
+            }
+        }
+
+        async function fetchRandomArticles() {
+             await new Promise(resolve => setTimeout(resolve, 300)); 
+             const randomUrl = `${WIKIPEDIA_BASE_URL}?action=query&format=json&list=random&rnlimit=${LOAD_LIMIT}&rnnamespace=0&prop=extracts|pageimages|info&inprop=url&exintro=false&explaintext=true&pithumbsize=400&piprop=thumbnail|original&origin=*`;
+             const randomResponse = await fetch(randomUrl);
+             const randomData = await randomResponse.json();
+             
+             const titles = randomData.query.random.map(item => item.title);
+             if (titles.length === 0) return [];
+            
+             const titlesString = titles.join('|');
+             const contentUrl = `${WIKIPEDIA_BASE_URL}?action=query&format=json&prop=extracts|pageimages|info&inprop=url&exintro=false&explaintext=true&pithumbsize=400&piprop=thumbnail|original&titles=${encodeURIComponent(titlesString)}&origin=*`;
+             
+             return processWikipediaArticles(contentUrl);
+        }
+        
+        async function fetchArticlesBySearch(query, offset = 0) {
+            await new Promise(resolve => setTimeout(resolve, 300)); 
+            
+            // Usamos list=search con sroffset para paginación
+            const searchUrl = `${WIKIPEDIA_BASE_URL}?action=query&list=search&srsearch=${encodeURIComponent(query)}&srlimit=${LOAD_LIMIT}&sroffset=${offset}&format=json&origin=*`;
+            const searchResponse = await fetch(searchUrl);
+            const searchData = await searchResponse.json();
+            
+            const titles = searchData.query.search.map(item => item.title);
+            if (titles.length === 0) return [];
+
+            const titlesString = titles.join('|');
+            const contentUrl = `${WIKIPEDIA_BASE_URL}?action=query&format=json&prop=extracts|pageimages|info&inprop=url&exintro=false&explaintext=true&pithumbsize=400&piprop=thumbnail|original&titles=${encodeURIComponent(titlesString)}&origin=*`;
+            
+            return processWikipediaArticles(contentUrl);
+        }
+
+        async function processWikipediaArticles(contentUrl) {
+            const contentResponse = await fetch(contentUrl);
+            const contentData = await contentResponse.json();
+
+            const pages = contentData.query.pages;
+            const articles = [];
+
+            for (const pageId in pages) {
+                const page = pages[pageId];
+                if (page.missing === "") continue;
+
+                articles.push({
+                    id: pageId,
+                    title: page.title,
+                    summary: page.extract ? page.extract.substring(0, 500).trim() + '...' : 'No hay resumen disponible.',
+                    fullContent: page.extract || 'Contenido no disponible.', 
+                    url: page.fullurl || `https://es.wikipedia.org/?curid=${pageId}`,
+                    imageUrl: page.original?.source || page.thumbnail?.source || null,
+                });
+            }
+            return articles;
+        }
+        
+        window.openArticleReader = function(articleId) {
+            // Buscamos el artículo tanto en el feed principal como en los resultados de búsqueda
+            const article = currentArticles.find(a => a.id.toString() === articleId.toString()) 
+                         || currentSearchResults.find(a => a.id.toString() === articleId.toString())
+                         || wkypeActivity.bookmarks[articleId];
+
+            if (!article) {
+                displayModalMessage('Error', 'Artículo no encontrado.');
+                return;
+            }
+
+            // REGISTRO DE ACTIVIDAD: Guardar la lectura
+            wkypeActivity.reads.push({ title: article.title, timestamp: new Date().toISOString() });
+            wkypeActivity.reads = wkypeActivity.reads.slice(-50); // Limitar a los últimos 50
+            saveActivity();
+            
+            // 1. Almacenar el contenido original
+            originalArticleContent = article.fullContent;
+
+            // 2. Renderizar el contenido original 
+            articleModalTitle.textContent = article.title;
+            renderFormattedContent(originalArticleContent);
+            articleModalContent.scrollTop = 0; 
+            
+            articleReaderModal.classList.remove('hidden');
+        }
+
+        // Función auxiliar para renderizar el contenido en el modal
+        function renderFormattedContent(content) {
+             const formattedContent = content
+                .split('\n')
+                .filter(p => p.trim() !== '')
+                .map(p => {
+                    // Intenta identificar títulos de sección (sección 1.1)
+                    if (p.match(/^==+.*?==+$/)) {
+                         return p.replace(/=/g, '').trim().length > 0 ? `<h4>${p.replace(/=/g, '').trim()}</h4>` : '';
+                    }
+                    return `<p>${p}</p>`;
+                })
+                .join('');
+
+            articleModalContent.innerHTML = formattedContent;
+            lucide.createIcons();
+        }
+
+        // --- Funciones de Verificación de Cuenta (Mantenidas) ---
+        
+        window.updateDocumentVisual = function(docType) {
+            if (docSideText) {
+                docSideText.textContent = docType === 'Licencia' ? 'frontal de tu Licencia' : 'página principal de tu Pasaporte';
+            }
+        }
+
+        window.openVerificationModal = function() {
+            closeSettingsModal(); 
+            verificationModal.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                verificationModal.classList.remove('translate-x-full');
+            });
+            verificationFile = null;
+            document.getElementById('document-upload').value = '';
+            
+            previewImageElement.classList.add('hidden');
+            scanPrompt.classList.remove('hidden'); 
+            
+            updateDocumentVisual('Licencia'); 
+
+            sendVerificationBtn.disabled = true;
+            scanLabel.style.border = '3px dashed #FE2C55';
+            sendVerificationBtn.classList.add('bg-gray-600');
+            sendVerificationBtn.classList.remove('bg-wkype-main', 'hover:opacity-90');
+        }
+
+        window.closeVerificationModal = function() {
+            verificationModal.classList.add('translate-x-full');
+            setTimeout(() => {
+                verificationModal.classList.add('hidden');
+            }, 300);
+        }
+        
+        window.closeVerificationSuccessModal = function() {
+             verificationSuccessModal.classList.add('hidden');
+             openSettingsModal(); 
+        }
+        
+        window.previewImage = function(event) {
+            const file = event.target.files[0];
+            verificationFile = file;
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImageElement.src = e.target.result;
+                    previewImageElement.classList.remove('hidden');
+                    scanPrompt.classList.add('hidden'); 
+                    
+                    scanLabel.style.border = '3px solid #10B981'; 
+                    sendVerificationBtn.disabled = false;
+                    sendVerificationBtn.classList.remove('bg-gray-600');
+                    sendVerificationBtn.classList.add('bg-wkype-main', 'hover:opacity-90');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewImageElement.classList.add('hidden');
+                scanPrompt.classList.remove('hidden'); 
+                
+                scanLabel.style.border = '3px dashed #FE2C55';
+                sendVerificationBtn.disabled = true;
+                sendVerificationBtn.classList.add('bg-gray-600');
+                sendVerificationBtn.classList.remove('bg-wkype-main', 'hover:opacity-90');
+            }
+        }
+        
+        window.submitVerification = function() {
+            if (!verificationFile) {
+                displayModalMessage('Error', 'Por favor, sube o escanea tu documento primero.');
+                return;
+            }
+            
+            console.log("Documento listo para enviar:", verificationFile.name);
+            displayModalMessage('Cargando', 'Enviando documento...');
+            
+            closeVerificationModal();
+            
+            setTimeout(() => {
+                 verificationSuccessModal.classList.remove('hidden');
+            }, 350); 
+            
+            verificationFile = null;
+        }
+
+        // --- Funciones de Selección y Eliminación (Mantenidas) ---
+        window.toggleSelectionMode = function() {
+            isSelectionMode = !isSelectionMode;
+            selectedBookmarks.clear();
+            
+            const button = document.getElementById('select-mode-button');
+            button.textContent = isSelectionMode ? 'Cancelar' : 'Seleccionar';
+            
+            if (isSelectionMode) {
+                selectionActionsBar.classList.remove('hidden');
+                feedContainer.style.bottom = '8rem'; 
+            } else {
+                selectionActionsBar.classList.add('hidden');
+                feedContainer.style.bottom = '4rem'; 
+            }
+            renderSavedArticles(); 
+        }
+        
+        window.toggleSelection = function(articleId) {
+            const idString = articleId.toString();
+            if (selectedBookmarks.has(idString)) {
+                selectedBookmarks.delete(idString);
+            } else {
+                selectedBookmarks.add(idString);
+            }
+            const checkbox = document.getElementById(`checkbox-${idString}`);
+            if (checkbox) {
+                checkbox.checked = selectedBookmarks.has(idString);
+            }
+        }
+
+        window.deleteSelectedBookmarks = function() {
+            if (selectedBookmarks.size === 0) {
+                displayModalMessage('Aviso', 'Selecciona al menos un artículo para eliminar.');
+                return;
+            }
+            
+            const count = selectedBookmarks.size;
+
+            selectedBookmarks.forEach(articleId => {
+                if (wkypeActivity.bookmarks[articleId]) {
+                    delete wkypeActivity.bookmarks[articleId];
+                }
+            });
+            saveActivity();
+            selectedBookmarks.clear();
+            toggleSelectionMode(); 
+            displayModalMessage('Éxito', `${count} artículos eliminados.`);
+            renderScreen('saved', true); 
+        }
+
+
+        // --- Funciones de Renderizado y UI (CORREGIDAS) ---
+
+        // ----- INICIO DE LA CORRECCIÓN CLAVE -----
+        window.renderScreen = function(screenName, forceRefresh = false) {
+            if (currentScreen === screenName && !forceRefresh) {
+                // Esta condición evita recargas innecesarias del feed,
+                // pero permite refrescar otras pantallas si se necesita.
+                if (screenName === 'feed') return;
+            }
+            currentScreen = screenName;
+            feedContainer.scrollTop = 0;
+            showLoader(false);
+
+            // 1. Resetear el estado de los contenedores y cabeceras principales
+            headerMain.classList.add('hidden');
+            headerSaved.classList.add('hidden');
+            peopleModal.classList.add('hidden');
+            feedContainer.classList.remove('hidden'); // Asegurarse de que el feed sea visible por defecto
+
+            selectionActionsBar.classList.add('hidden');
+            feedContainer.style.bottom = '4rem';
+
+            // 2. Resetear el botón de navegación activo
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('text-wkype-main');
+                btn.classList.add('text-white/70');
+            });
+
+            // Ocultar todos los otros modales por si acaso
+            [searchModal, settingsModal, articleReaderModal, verificationModal, verificationSuccessModal, document.getElementById('interests-modal'), historyModal, profileModal].forEach(m => m && m.classList.add('hidden'));
+            isSelectionMode = false;
+
+            // Limpia el contenido del feed y resetea listeners
+            feedContainer.innerHTML = '';
+            feedContainer.removeEventListener('scroll', handleFeedScroll);
+            feedContainer.classList.remove('feed-snap');
+
+            // 3. Aplicar la lógica específica para cada pantalla
+            if (screenName === 'saved') {
+                headerSaved.classList.remove('hidden');
+                feedContainer.style.top = '5rem';
+                renderSavedArticles();
+
+            } else if (screenName === 'people') {
+                peopleModal.classList.remove('hidden'); // Mostrar el modal de personas
+                feedContainer.classList.add('hidden');   // Ocultar el contenedor del feed detrás
+                renderSuggestedPeople();
+
+            } else { // 'feed'
+                headerMain.classList.remove('hidden');
+                feedContainer.style.top = '6rem';
+                feedContainer.addEventListener('scroll', handleFeedScroll);
+                feedContainer.classList.add('feed-snap');
+                loadFeed(currentFeedMode);
+            }
+
+            // 4. Activar el ícono de navegación correcto
+            const activeNavId = `nav-${screenName}`;
+            const activeNavButton = document.getElementById(activeNavId);
+            if (activeNavButton) {
+                activeNavButton.classList.remove('text-white/70');
+                activeNavButton.classList.add('text-wkype-main');
+            }
+        }
+        // ----- FIN DE LA CORRECCIÓN CLAVE -----
+
+
+        function renderWelcomeScreen(mode) {
+            let title, message, buttonText;
+
+            if (mode === 'foryou') {
+                const keyword = currentForyouQuery;
+                if (keyword) {
+                     title = 'Cargando más artículos...';
+                     message = `Buscando más sobre "${keyword}" para ti.`;
+                     buttonText = 'Buscando...';
+                } else {
+                     title = '¡Aún no hay Para Ti!';
+                     message = 'Interactúa (busca, lee y guarda) en "Explorar" para que podamos crear tu perfil personalizado.';
+                     buttonText = 'Ir a Explorar';
+                }
+            } else {
+                title = 'Bienvenido a Wkype';
+                message = 'Usa la sección "Explorar" para ver artículos al azar o "Para Ti" para contenido personalizado.';
+                buttonText = 'Empezar a Explorar';
+            }
+
+            feedContainer.innerHTML = `
+                <div class="article-card-feed flex flex-col justify-center items-center p-8 text-center min-h-full bg-black/90">
+                    <i data-lucide="sparkles" class="w-16 h-16 text-wkype-main mx-auto mb-4"></i>
+                    <h2 class="text-4xl font-extrabold mb-4">${title}</h2>
+                    <p class="text-gray-400 mb-6">${message}</p>
+                    <button onclick="loadFeed('explore')" class="px-6 py-3 bg-wkype-main text-white font-bold rounded-xl shadow-lg hover:opacity-90 transition">
+                        ${buttonText}
+                    </button>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // Función de renderizado que permite limpiar o solo añadir contenido
+        function renderArticles(articles, clear = true) {
+            if (clear) {
+                feedContainer.innerHTML = '';
+            }
+            articles.forEach(article => {
+                feedContainer.appendChild(createArticleCard(article));
+            });
+            lucide.createIcons();
+        }
+        
+        // Renderizado de resultados de búsqueda (AJUSTADO: DENTRO DEL MODAL)
+        function renderSearchResults(articles, clear = true) {
+            if (clear) {
+                searchResultsContainer.innerHTML = '';
+            }
+            articles.forEach(article => {
+                 searchResultsContainer.appendChild(createSearchResultCard(article));
+            });
+            lucide.createIcons();
+
+            // Agregar listener de scroll para carga infinita de búsqueda
+            const resultsScrollContainer = document.getElementById('search-results-container');
+            resultsScrollContainer.removeEventListener('scroll', handleSearchScroll);
+            resultsScrollContainer.addEventListener('scroll', handleSearchScroll);
+        }
+        
+        function handleSearchScroll() {
+            const container = document.getElementById('search-results-container');
+            const query = searchInput.value.trim();
+            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 200 && !isLoading && currentSearchResults.length > 0 && query) {
+                loadMoreSearchResults(query);
+            }
+        }
+        
+        function renderSearchMessage(title, subtitle) {
+            searchResultsContainer.innerHTML = `
+                <div class="flex flex-col justify-center items-center p-8 text-center">
+                    <i data-lucide="frown" class="w-12 h-12 text-gray-500 mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2 text-white">${title}</h3>
+                    <p class="text-gray-400">${subtitle}</p>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+
+        function renderSavedArticles() {
+            const savedList = Object.values(wkypeActivity.bookmarks).sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt));
+            if (savedList.length === 0) {
+                displayMessage('No tienes artículos guardados', 'Toca el ícono de "Guardar" en un artículo del feed para verlo aquí.', 'saved');
+                return;
+            }
+            
+            feedContainer.innerHTML = `<div class="p-2 grid grid-cols-2 gap-2 pb-8"></div>`;
+            const grid = feedContainer.querySelector('.grid');
+            
+            savedList.forEach(article => {
+                grid.appendChild(createSavedGridCard(article));
+            });
+
+            lucide.createIcons();
+        }
+
+        function createSavedGridCard(article) {
+            const card = document.createElement('div');
+            const isSelected = selectedBookmarks.has(article.id.toString());
+            
+            card.className = `relative w-full aspect-[2/3] rounded-lg overflow-hidden transition-all duration-300 ${isSelectionMode ? 'cursor-pointer' : ''} ${isSelected && isSelectionMode ? 'ring-4 ring-wkype-main' : ''}`;
+            
+            card.style.backgroundImage = `url('${article.imageUrl || `https://placehold.co/480x850/1A1A1A/FFFFFF?text=${encodeURIComponent(article.title)}`}')`;
+            card.style.backgroundSize = 'cover';
+            card.style.backgroundPosition = 'center';
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3';
+            
+            overlay.innerHTML = `
+                <h4 class="text-base font-bold text-white line-clamp-2">${article.title}</h4>
+                <p class="text-xs text-gray-400 mt-1">${new Date(article.savedAt).toLocaleDateString()}</p>
+            `;
+
+            card.appendChild(overlay);
+
+            if (isSelectionMode) {
+                const checkboxOverlay = document.createElement('div');
+                checkboxOverlay.className = 'absolute inset-0 flex justify-end items-start p-2 z-10';
+                checkboxOverlay.innerHTML = `
+                    <input type="checkbox" id="checkbox-${article.id}" 
+                           class="w-6 h-6 rounded-full bg-black border-2 border-white accent-wkype-main pointer-events-none"
+                           ${isSelected ? 'checked' : ''}>
+                `;
+                card.appendChild(checkboxOverlay);
+                card.onclick = () => toggleSelection(article.id);
+            } else {
+                card.onclick = () => openArticleReader(article.id);
+            }
+
+            return card;
+        }
+
+
+        function createArticleCard(article) {
+            const isSaved = !!wkypeActivity.bookmarks[article.id];
+            
+            const card = document.createElement('div');
+            card.className = 'article-card-feed relative p-4 flex flex-col justify-end overflow-hidden border-b border-wkype-light';
+            
+            const imageUrl = article.imageUrl || `https://placehold.co/480x850/1A1A1A/FFFFFF?text=${encodeURIComponent(article.title)}`;
+            card.style.backgroundImage = `url('${imageUrl}')`;
+            card.style.backgroundSize = 'cover';
+            card.style.backgroundPosition = 'center';
+
+            const overlay = document.createElement('div');
+            overlay.className = 'absolute inset-0 bg-gradient-to-t from-black/80 to-transparent';
+            card.appendChild(overlay);
+
+            const content = document.createElement('div');
+            content.className = 'relative z-10 p-4 pb-16'; 
+            content.innerHTML = `
+                <div class="flex flex-col mb-4">
+                    <h3 class="text-4xl font-extrabold mb-1 drop-shadow-lg leading-snug">${article.title}</h3>
+                    <p class="text-gray-300 text-lg mb-4 drop-shadow-md line-clamp-4">${article.summary}</p>
+
+                    <div class="flex items-center space-x-4 mt-4">
+                        <button onclick="openArticleReader('${article.id}')" 
+                           class="px-5 py-2 bg-white text-black font-bold text-sm rounded-full shadow-lg hover:bg-gray-200 transition flex items-center">
+                            <i data-lucide="book-open" class="w-4 h-4 mr-2"></i>
+                            Ver Artículo
+                        </button>
+                        <!-- Botón con clase única para actualización en tiempo real -->
+                        <button class="p-3 ${isSaved ? 'bg-wkype-main' : 'bg-white/10'} text-white rounded-full hover:bg-white/20 transition shadow-lg save-btn-${article.id}"
+                           onclick="toggleBookmark(${JSON.stringify(article).replace(/"/g, '&quot;')})">
+                            <i data-lucide="${isSaved ? 'bookmark-check' : 'bookmark'}" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            card.appendChild(content);
+            
+            return card;
+        }
+        
+        // Nueva función para el renderizado de tarjetas de búsqueda (Más compacto)
+        function createSearchResultCard(article) {
+            const isSaved = !!wkypeActivity.bookmarks[article.id];
+            
+            const card = document.createElement('div');
+            card.className = 'flex items-center space-x-4 p-3 bg-wkype-dark rounded-xl border border-wkype-light';
+            
+            const imageUrl = article.imageUrl || `https://placehold.co/100x100/222222/FFFFFF?text=W`;
+            
+            card.innerHTML = `
+                <img src="${imageUrl}" onerror="this.onerror=null; this.src='https://placehold.co/100x100/222222/FFFFFF?text=W'" 
+                     class="w-16 h-16 rounded-lg object-cover flex-shrink-0" alt="Imagen del artículo">
+                
+                <div class="flex-grow min-w-0">
+                    <h4 onclick="openArticleReader('${article.id}')" class="text-base font-bold text-white line-clamp-2 hover:text-wkype-main cursor-pointer">${article.title}</h4>
+                    <p class="text-xs text-gray-400 line-clamp-2">${article.summary.substring(0, 100)}...</p>
+                </div>
+                
+                <button class="p-2 ${isSaved ? 'text-wkype-main' : 'text-gray-500'} hover:text-wkype-main transition flex-shrink-0 save-btn-${article.id}" 
+                        onclick="toggleBookmark(${JSON.stringify(article).replace(/"/g, '&quot;')})">
+                    <i data-lucide="${isSaved ? 'bookmark-check' : 'bookmark'}" class="w-5 h-5"></i>
+                </button>
+            `;
+            
+            return card;
+        }
+
+        // --- Funciones de Administración de Intereses (Mantenidas) ---
+        
+        window.openInterestsModal = function() {
+            closeSettingsModal(); 
+            renderInterestProfile(); 
+            const interestsModal = document.getElementById('interests-modal');
+            interestsModal.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                interestsModal.classList.remove('translate-x-full');
+            });
+        }
+
+        window.closeInterestsModal = function() {
+            const interestsModal = document.getElementById('interests-modal');
+            interestsModal.classList.add('translate-x-full');
+            setTimeout(() => {
+                interestsModal.classList.add('hidden');
+            }, 300);
+            openSettingsModal(); 
+        }
+
+        window.renderInterestProfile = function() {
+            const profile = generateInterestProfile();
+            const listContainer = document.getElementById('interest-keywords-list');
+            const noInterestsMessage = document.getElementById('no-interests-message');
+            const interestCountSpan = document.getElementById('interest-count');
+
+            listContainer.innerHTML = ''; 
+            topForyouKeywords = profile; 
+
+            if (profile && profile.length > 0) {
+                profile.forEach(keyword => {
+                    const chip = document.createElement('span');
+                    chip.className = 'px-4 py-2 bg-wkype-main text-white text-sm font-semibold rounded-full shadow-md';
+                    chip.textContent = keyword;
+                    listContainer.appendChild(chip);
+                });
+                interestCountSpan.textContent = profile.length;
+                noInterestsMessage.classList.add('hidden');
+            } else {
+                interestCountSpan.textContent = 0;
+                noInterestsMessage.classList.remove('hidden');
+                noInterestsMessage.textContent = 'Aún no hay suficiente actividad (lecturas, búsquedas o guardados) para generar un perfil de intereses. ¡Comienza a explorar!';
+            }
+        }
+        
+        window.clearAllActivity = function() {
+            wkypeActivity = {
+                bookmarks: {},
+                searches: [],
+                reads: [],
+            };
+            saveActivity();
+            
+            renderInterestProfile();
+            displayModalMessage('Borrado', 'Tu perfil de interés y toda la actividad han sido eliminados.');
+            
+            if (currentFeedMode === 'foryou') {
+                renderScreen('feed', true); 
+            }
+        }
+        
+        // --- Funciones de Historial (NUEVAS) ---
+
+        window.openHistoryModal = function() {
+            closeInterestsModal(); // Cierra intereses antes de abrir historial
+            renderHistory();
+            historyModal.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                historyModal.classList.remove('translate-x-full');
+            });
+        }
+
+        window.closeHistoryModal = function() {
+            historyModal.classList.add('translate-x-full');
+            setTimeout(() => {
+                historyModal.classList.add('hidden');
+            }, 300);
+            openInterestsModal(); // Vuelve al modal de intereses
+        }
+        
+        function renderHistory() {
+            const searches = wkypeActivity.searches.reverse(); // Último primero
+            const reads = wkypeActivity.reads.reverse(); // Último primero
+            
+            let html = `
+                <div class="p-4 bg-wkype-light rounded-xl">
+                    <h3 class="text-lg font-bold text-white mb-2 flex items-center"><i data-lucide="info" class="w-5 h-5 mr-2 text-wkype-main"></i>Nota</h3>
+                    <p class="text-sm text-gray-300">Aquí se registra tu actividad reciente (máximo 50 elementos por categoría) para fines de auditoría y personalización del algoritmo "Para Ti".</p>
+                </div>
+            `;
+            
+            // 1. Historial de Búsquedas
+            html += `
+                <div class="pt-4 border-t border-wkype-light">
+                    <h3 class="text-gray-400 font-semibold mb-3">Búsquedas Recientes (${searches.length})</h3>
+                    <div class="space-y-2">
+            `;
+            if (searches.length === 0) {
+                 html += `<p class="text-gray-500 text-sm">No has realizado búsquedas recientemente.</p>`;
+            } else {
+                searches.forEach(item => {
+                    html += createHistoryCard(item, 'search');
+                });
+            }
+            html += `</div></div>`;
+            
+            // 2. Historial de Lecturas
+            html += `
+                <div class="pt-4 border-t border-wkype-light">
+                    <h3 class="text-gray-400 font-semibold mb-3">Artículos Leídos Recientes (${reads.length})</h3>
+                    <div class="space-y-2">
+            `;
+            if (reads.length === 0) {
+                 html += `<p class="text-gray-500 text-sm">No has leído artículos recientemente.</p>`;
+            } else {
+                reads.forEach(item => {
+                    html += createHistoryCard(item, 'read');
+                });
+            }
+            html += `</div></div>`;
+            
+            historyContent.innerHTML = html;
+            lucide.createIcons();
+        }
+        
+        function createHistoryCard(item, type) {
+            const content = type === 'search' ? item.query : item.title;
+            const icon = type === 'search' ? 'search' : 'book-open';
+            const action = type === 'search' ? `handleSearch('${content}')` : `displayModalMessage('Lectura', 'El artículo "${content}" fue leído. No se puede reabrir directamente desde el historial local.')`;
+            
+            return `
+                <div class="flex justify-between items-center p-3 bg-wkype-dark rounded-lg hover:bg-wkype-light transition cursor-pointer" onclick="${action}">
+                    <div class="flex items-center space-x-3 min-w-0">
+                        <i data-lucide="${icon}" class="w-5 h-5 text-wkype-main flex-shrink-0"></i>
+                        <span class="text-white text-sm truncate">${content}</span>
+                    </div>
+                    <span class="text-xs text-gray-500 flex-shrink-0 ml-2">${new Date(item.timestamp).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+            `;
+        }
+
+        // --- Funciones del nuevo Modal de Ajustes (Mantenidas) ---
+        
+        window.openSettingsModal = function() {
+            settingsModal.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                settingsModal.classList.remove('translate-x-full');
+            });
+        }
+        
+        window.closeSettingsModal = function() {
+            settingsModal.classList.add('translate-x-full');
+            setTimeout(() => {
+                settingsModal.classList.add('hidden');
+            }, 300);
+        }
+
+        window.showDataSourceInfo = function() {
+            displayModalMessage('Fuente de Datos', 'Todo el contenido proviene de la API pública de Wikipedia en español.');
+        }
+
+        function displayMessage(title, subtitle, screen) {
+            feedContainer.innerHTML = `
+                <div class="article-card-feed flex flex-col justify-center items-center p-8 text-center min-h-full">
+                    <i data-lucide="frown" class="w-16 h-16 text-gray-500 mb-4"></i>
+                    <h2 class="text-3xl font-bold mb-2">${title}</h2>
+                    <p class="text-gray-400">${subtitle}</p>
+                    ${screen !== 'saved' ? `
+                        <button onclick="openSearchModal()" class="mt-8 px-6 py-3 bg-wkype-main text-white font-bold rounded-xl shadow-lg hover:opacity-90 transition">
+                            Nueva Búsqueda
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function displayModalMessage(title, message, id = 'simple-modal') {
+            let modal = document.getElementById(id);
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = id;
+                modal.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/90 p-6 rounded-xl shadow-2xl z-[200] transition-all duration-300 scale-0 opacity-0 max-w-xs text-center';
+                modal.innerHTML = `<h4 class="text-lg font-bold mb-2 text-white" id="${id}-title"></h4><p class="text-sm text-gray-300" id="${id}-message"></p>`;
+                document.body.appendChild(modal);
+            }
+
+            document.getElementById(`${id}-title`).textContent = title;
+            document.getElementById(`${id}-message`).textContent = message;
+            
+            modal.classList.remove('scale-0', 'opacity-0');
+            modal.classList.add('scale-100', 'opacity-100');
+
+            setTimeout(() => {
+                modal.classList.remove('scale-100', 'opacity-100');
+                modal.classList.add('scale-0', 'opacity-0');
+            }, 1500);
+        }
+
+        function showLoader(show) {
+            if (show) {
+                loadingIndicator.classList.remove('hidden');
+            } else {
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+        
+        // --- Lógica de Scroll para Ocultar Cabecera y Cargar Más (Scroll Infinito) ---
+        function handleFeedScroll() {
+            if (currentScreen !== 'feed') return; 
+            
+            // 1. Ocultar/Mostrar Cabecera (UX TikTok)
+            const st = feedContainer.scrollTop;
+            if (st > lastScrollTop && st > 50) { // Deslizando hacia abajo
+                headerMain.classList.add('header-hidden');
+            } else if (st < lastScrollTop) { // Deslizando hacia arriba
+                headerMain.classList.remove('header-hidden');
+            }
+            lastScrollTop = st <= 0 ? 0 : st; 
+            
+            // 2. Carga Infinita: Detectar si el usuario está a 200px del final
+            const scrollHeight = feedContainer.scrollHeight;
+            const clientHeight = feedContainer.clientHeight;
+            const scrollTop = feedContainer.scrollTop;
+
+            if (scrollTop + clientHeight >= scrollHeight - 200 && !isLoading) {
+                loadMoreArticles();
+            }
+        }
+
+        // --- NUEVAS FUNCIONES PARA LA SECCIÓN DE PERSONAS ---
+        
+        function renderSuggestedPeople() {
+            suggestedPeopleList.innerHTML = ''; // Limpiar lista
+            
+            // Título de la sección
+            suggestedPeopleList.innerHTML = `
+                <h3 class="text-gray-300 font-bold text-lg mb-4 mt-2">Cuentas Oficiales y Verificadas</h3>
+                <p class="text-sm text-gray-500 mb-6">Sigue a los líderes y colaboradores de Wkype para ver su actividad y curación de contenido.</p>
+                <div class="space-y-4 pb-16" id="people-cards-container"></div>
+            `;
+            
+            const container = document.getElementById('people-cards-container');
+
+            suggestedPeopleData.forEach(person => {
+                container.appendChild(createPersonCard(person));
+            });
+            lucide.createIcons();
+        }
+        
+        function createPersonCard(person) {
+            const card = document.createElement('div');
+            // Usamos un diseño similar a los resultados de búsqueda para mantener la coherencia
+            card.className = 'flex items-center p-3 bg-wkype-dark rounded-xl border border-wkype-light hover:bg-wkype-light transition cursor-pointer';
+            card.onclick = () => openProfileModal(person.id);
+            
+            const profileImageUrl = `https://placehold.co/60x60/FE2C55/FFFFFF?text=${person.name[0]}`; // Inicial de su nombre
+            
+            card.innerHTML = `
+                <img src="${profileImageUrl}" onerror="this.onerror=null; this.src='${profileImageUrl}'" 
+                     class="w-16 h-16 rounded-full object-cover flex-shrink-0 border-2 border-wkype-main" alt="Perfil de ${person.name}">
+                
+                <div class="flex-grow min-w-0 ml-4">
+                    <h4 class="text-lg font-bold text-white line-clamp-1 flex items-center">
+                        ${person.name}
+                        ${person.isOfficial ? '<i data-lucide="check-circle" class="w-4 h-4 text-blue-400 ml-2 fill-blue-400"></i>' : ''}
+                    </h4>
+                    <p class="text-sm text-gray-400 line-clamp-1">${person.tag}</p>
+                </div>
+                
+                <button class="px-3 py-1 text-sm font-semibold rounded-full flex-shrink-0 transition-all 
+                        ${person.isFollowing ? 'bg-gray-700 text-gray-300' : 'bg-wkype-main text-white'}" 
+                        onclick="event.stopPropagation(); toggleFollow('${person.id}')">
+                    ${person.isFollowing ? 'Siguiendo' : 'Seguir'}
+                </button>
+            `;
+            
+            return card;
+        }
+
+        window.openProfileModal = function(personId) {
+            peopleModal.classList.add('hidden'); // Oculta el modal de personas
+            profileModal.classList.remove('hidden');
+            
+            // Busca la persona por ID (usamos Darel como el perfil principal solicitado)
+            const person = suggestedPeopleData.find(p => p.id === personId);
+            if (!person) {
+                closeProfileModal();
+                displayModalMessage('Error', 'Perfil no encontrado.');
+                return;
+            }
+            
+            renderProfileContent(person);
+        }
+        
+        window.closeProfileModal = function() {
+            profileModal.classList.add('hidden');
+            peopleModal.classList.remove('hidden'); // Regresa al modal de personas
+        }
+
+        function renderProfileContent(person) {
+            const isFollowing = person.isFollowing;
+            
+            profileContent.innerHTML = `
+                <!-- Encabezado del Perfil (Simulación de TikTok) -->
+                <div class="flex flex-col items-center pt-4 pb-6 border-b border-wkype-light mb-6">
+                    <img src="https://placehold.co/100x100/FE2C55/FFFFFF?text=${person.name[0]}" 
+                         class="w-24 h-24 rounded-full object-cover border-4 border-wkype-main shadow-lg mb-4" alt="Perfil de ${person.name}">
+                    
+                    <h1 class="text-2xl font-extrabold text-white flex items-center mb-1">
+                        ${person.name}
+                        ${person.isOfficial ? '<i data-lucide="check-circle" class="w-5 h-5 text-blue-400 ml-2 fill-blue-400"></i>' : ''}
+                    </h1>
+                    
+                    <p class="text-sm text-gray-400 mb-4">@${person.id}</p>
+
+                    <!-- Botón Seguir -->
+                    <button id="follow-btn" 
+                            onclick="toggleFollow('${person.id}', true)" 
+                            class="w-40 py-2 font-bold text-lg rounded-xl transition-all shadow-xl 
+                            ${isFollowing ? 'bg-gray-700 text-gray-300 border border-gray-600' : 'bg-wkype-main text-white'}">
+                        ${isFollowing ? 'Siguiendo' : 'Seguir'}
+                    </button>
+                </div>
+                
+                <!-- Estadísticas (Artículos leídos y revisados) -->
+                <div class="flex justify-around items-center text-center mb-8">
+                    <div>
+                        <p class="text-xl font-extrabold text-white">${person.readCount}</p>
+                        <p class="text-sm text-gray-400">Artículos leídos</p>
+                    </div>
+                    <div>
+                        <p class="text-xl font-extrabold text-white">${person.reviewedCount}</p>
+                        <p class="text-sm text-gray-400">Revisados</p>
+                    </div>
+                </div>
+                
+                <!-- Biografía / Etiqueta -->
+                <div class="text-center mb-8">
+                    <span class="px-4 py-1 bg-wkype-light text-wkype-main font-semibold text-sm rounded-full">${person.tag}</span>
+                    <p class="text-gray-300 mt-4 text-center text-base max-w-sm mx-auto">${person.bio}</p>
+                </div>
+                
+                <!-- Mensaje de no mostrar más nada -->
+                 <div class="pt-4 border-t border-wkype-light text-center">
+                    <p class="text-sm text-gray-500 flex items-center justify-center">
+                        <i data-lucide="lock" class="w-4 h-4 mr-1"></i> Contenido adicional restringido
+                    </p>
+                </div>
+                
+            `;
+            lucide.createIcons();
+        }
+
+        window.toggleFollow = function(personId, fromProfile = false) {
+            const personIndex = suggestedPeopleData.findIndex(p => p.id === personId);
+            if (personIndex === -1) return;
+
+            const person = suggestedPeopleData[personIndex];
+            person.isFollowing = !person.isFollowing;
+            
+            const action = person.isFollowing ? 'Empezaste a seguir' : 'Dejaste de seguir';
+            displayModalMessage(action, `Ahora ${action} a ${person.name}.`);
+
+            // Si se llama desde el modal de perfil, actualiza el botón
+            if (fromProfile) {
+                const followBtn = document.getElementById('follow-btn');
+                if (followBtn) {
+                     followBtn.textContent = person.isFollowing ? 'Siguiendo' : 'Seguir';
+                     followBtn.classList.remove(person.isFollowing ? 'bg-wkype-main' : 'bg-gray-700', person.isFollowing ? 'text-white' : 'text-gray-300');
+                     followBtn.classList.add(person.isFollowing ? 'bg-gray-700' : 'bg-wkype-main', person.isFollowing ? 'text-gray-300' : 'text-white');
+                }
+            }
+            
+            // Re-renderiza la lista de personas si es necesario
+            if (!fromProfile && currentScreen === 'people') {
+                 renderSuggestedPeople();
+            }
+        }
+        
+        // --- Inicialización de la aplicación ---
+        
+        function initializeApp() {
+            loadActivity();
+            document.getElementById('user-id-display').textContent = 'Modo Local'; 
+            renderScreen('feed'); 
+        }
+        
+        window.onload = () => {
+             lucide.createIcons();
+             initializeApp();
+        };
+
+    </script>
 </body>
 </html>
+
+
