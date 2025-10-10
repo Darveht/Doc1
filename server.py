@@ -18,6 +18,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
 if __name__ == '__main__':
     handler = MyHTTPRequestHandler
+    socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("0.0.0.0", PORT), handler) as httpd:
         print(f"Servidor corriendo en http://0.0.0.0:{PORT}")
         httpd.serve_forever()
