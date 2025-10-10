@@ -842,7 +842,6 @@
         }
 
         window.loadFeed = async function(mode) {
-            console.log('loadFeed llamado con modo:', mode);
             if (isLoading && mode === currentFeedMode) return; 
 
             // Si estamos en búsqueda, cerramos el modal antes de ir al feed
@@ -1196,7 +1195,6 @@
 
         // ----- INICIO DE LA CORRECCIÓN CLAVE -----
         window.renderScreen = function(screenName, forceRefresh = false) {
-            console.log('renderScreen llamado con:', screenName, 'forceRefresh:', forceRefresh);
             if (currentScreen === screenName && !forceRefresh) {
                 // Esta condición evita recargas innecesarias del feed,
                 // pero permite refrescar otras pantallas si se necesita.
@@ -1242,12 +1240,10 @@
                 renderSuggestedPeople();
 
             } else { // 'feed'
-                console.log('Preparando feed...');
                 headerMain.classList.remove('hidden');
                 feedContainer.style.top = '6rem';
                 feedContainer.addEventListener('scroll', handleFeedScroll);
                 feedContainer.classList.add('feed-snap');
-                console.log('Llamando a loadFeed con modo:', currentFeedMode);
                 loadFeed(currentFeedMode);
             }
 
@@ -1849,14 +1845,12 @@
         // --- Inicialización de la aplicación ---
         
         function initializeApp() {
-            console.log('Inicializando aplicación...');
             loadActivity();
             document.getElementById('user-id-display').textContent = 'Modo Local'; 
             renderScreen('feed'); 
         }
         
         window.onload = () => {
-             console.log('Página cargada, inicializando íconos...');
              lucide.createIcons();
              initializeApp();
         };
